@@ -35,3 +35,5 @@ Backend API	-> Node.js with ethers.js or web3
 Frontend -> React or any HTML/JS frontend
 
 https://www.youtube.com/watch?v=EhPeHeoKF88
+
+https://www.freecodecamp.org/news/introduction-to-blockchain/
