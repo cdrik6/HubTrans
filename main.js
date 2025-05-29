@@ -6,23 +6,28 @@
 /*   By: caguillo <caguillo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 00:42:02 by caguillo          #+#    #+#             */
-/*   Updated: 2025/05/29 01:10:35 by caguillo         ###   ########.fr       */
+/*   Updated: 2025/05/30 01:19:09 by caguillo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-const fastify = require('fastify')({logger: true});
+const fastify = require('fastify')( {logger: true} );
 
 // Declare a route
-fastify.get('/hello',  function (request, reply) {
-  reply.send({message: 'hello world'})
-})
+fastify.get('/hello',
+  function (request, reply)
+  {
+    reply.send({message: 'hello world'})
+  }
+);
 
 // Run the server!
-fastify.listen({ port: 3000 }, function (err, address) {
-  if (err) {
-    fastify.log.error(err)
-    process.exit(1)
-  }
+fastify.listen({ port: 3000 },
+  function (err, address)
+  {
+    if (err) {
+      fastify.log.error(err)
+      process.exit(1)
+    }
   // Server is now listening on ${address}
-})
-
+  }
+);
