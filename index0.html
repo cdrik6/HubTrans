@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+	let student = {
+  		name: 'John',
+  		age: 30,
+  		isAdmin: false,
+  		courses: ['html', 'css', 'js'],
+  		spouse: null
+	};
+
+	let json = JSON.stringify(student);
+	alert(typeof json); // nous avons une string !
+	alert(json);
+	
+	let json2 = JSON.parse(json);
+	alert(typeof json2);
+	alert(json2);
+
+</script>
+
+
+
+<h1>My First Heading</h1>
+<p>My first paragraph.</p>
+
+</body>
+</html> 
