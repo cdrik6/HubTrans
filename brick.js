@@ -6,12 +6,13 @@
 /*   By: caguillo <caguillo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/02 21:36:04 by caguillo          #+#    #+#             */
-/*   Updated: 2025/06/05 01:22:25 by caguillo         ###   ########.fr       */
+/*   Updated: 2025/06/06 00:57:26 by caguillo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 let canvas = document.getElementById("myCanvas");
-let para = document.getElementById("myP");
+let para1 = document.getElementById("myP1");
+let para2 = document.getElementById("myP2");
 let ctx = canvas.getContext("2d");
 let ballRadius = 10;
 let d = -2;
@@ -42,12 +43,12 @@ function drawBall() {
 	ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
 	ctx.fillStyle = "rgba(255, 0, 0, 1)";
 	ctx.fill();
-	ctx.arc(x-2*signX, y-2*signY, ballRadius, 0, Math.PI * 2);
-	ctx.fillStyle = "rgba(255, 0, 0, 0.6)";
-	ctx.fill();
-	ctx.arc(x-4*signX, y-4*signY, ballRadius, 0, Math.PI * 2);
-	ctx.fillStyle = "rgba(255, 0, 0, 0.3)";
-	ctx.fill();
+	// ctx.arc(x-2*signX, y-2*signY, ballRadius, 0, Math.PI * 2);
+	// ctx.fillStyle = "rgba(255, 0, 0, 0.6)";
+	// ctx.fill();
+	// ctx.arc(x-4*signX, y-4*signY, ballRadius, 0, Math.PI * 2);
+	// ctx.fillStyle = "rgba(255, 0, 0, 0.3)";
+	// ctx.fill();
 	ctx.closePath();	
 }
 
@@ -63,11 +64,12 @@ function drawPaddles() {
 function draw() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);	  		
 	drawBall();
-	drawPaddles(); 
+	drawPaddles();
+	 
 	// check
-	if (x + ballRadius >= canvas.width)
+	if (x + ballRadius >= canvas.width) // - paddleWidth)
 		loose2 = true; // signX = -signX;
-	else if (x - ballRadius <= 0)
+	else if (x - ballRadius <= 0) //paddleWidth)
 		loose1 = true; // signX = -signX;
 	else if (y + ballRadius == canvas.height || y - ballRadius == 0)
 	{
@@ -86,13 +88,29 @@ function draw() {
 	// 	// signY = getRandomSign();
 	// 	// padTouch2 = true;
 	// }
-	else if (x + ballRadius + paddleWidth > canvas.width && distBallPad2() < 0)
+	// else if (x + ballRadius + paddleWidth > canvas.width && distBallPad2() < 0)
+	// else if (distBallPad2() <= 0)
+	// {
+	// 	signX = -signX;
+	// 	// para2.innerHTML = distBallPad2();
+	// 	console.log("pad2: " + distBallPad2());
+	// }
+	else if (x + ballRadius + signX*dx > canvas.width - paddleWidth) // if next time ...
 	{
-		signX = -signX;
-	}
-	else if (x - ballRadius - paddleWidth <	 0 && distBallPad1() < 0)
+		if (paddle2Y <= y && y <= paddle2Y + paddleHeight)
+			signX = -signX;
+	}	
+	// else if (x - ballRadius - paddleWidth <	 0 && distBallPad1() < 0)
+	// else if (distBallPad1() <= 0)
+	// {
+	// 	signX = -signX;
+	// 	// para1.innerHTML = distBallPad1();
+	// 	console.log("pad1: " + distBallPad1());
+	// }
+	else if (x - ballRadius + signX*dx < paddleWidth) // if next time ...
 	{
-		signX = -signX;
+		if (paddle1Y <= y && y <= paddle1Y + paddleHeight)
+			signX = -signX;
 	}
 		
 	// next
@@ -143,7 +161,7 @@ function padMovement()
 		if (paddle1Y + paddleHeight < canvas.height )
 			paddle1Y = paddle1Y + padSpeed;
 	}
-	// para.innerHTML = distBallPad2();
+	
 }
 
 function keyDownHandler(e) {
@@ -200,8 +218,8 @@ function distBallPad2()
 	const xP = canvas.width - paddleWidth;
 	const yP = paddle2Y + paddleHeight;	
 
-	if (y >= paddle2Y && y <= yP)
-		return (xP - (x + ballRadius));
+	if (y >= paddle2Y && y <= yP)	
+		return (xP - (x + ballRadius));	
 	if (y > yP)
 		return (Math.sqrt((x - xP) * (x - xP) + (y - yP) * (y - yP)) - ballRadius);
 	if (y < paddle2Y)
@@ -211,14 +229,12 @@ function distBallPad2()
 function distBallPad1()
 {
 	const xP = paddleWidth;
-	const yP = paddle1Y + paddleHeight;
-	
+	const yP = paddle1Y + paddleHeight;	
 
-	if (y >= paddle1Y && y <= yP)
-		return (xP - (x + ballRadius));
+	if (y >= paddle1Y && y <= yP)		
+		return ((x - ballRadius) - xP);	
 	if (y > yP)
 		return (Math.sqrt((x - xP) * (x - xP) + (y - yP) * (y - yP)) - ballRadius);
 	if (y < paddle1Y)
-		return (Math.sqrt((x - xP) * (x - xP) + (y - paddle1Y) * (y - paddle1Y)) - ballRadius);
-		
+		return (Math.sqrt((x - xP) * (x - xP) + (y - paddle1Y) * (y - paddle1Y)) - ballRadius);		
 }
