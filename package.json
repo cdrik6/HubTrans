@@ -20,5 +20,6 @@
   "bugs": {
     "url": "https://github.com/cdrik6/HubTrans/issues"
   },
-  "homepage": "https://github.com/cdrik6/HubTrans#readme"
+  "homepage": "https://github.com/cdrik6/HubTrans#readme",
+  "devDependencies": {}
 }
