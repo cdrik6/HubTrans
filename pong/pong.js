@@ -6,7 +6,7 @@
 /*   By: caguillo <caguillo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/02 21:36:04 by caguillo          #+#    #+#             */
-/*   Updated: 2025/06/08 23:51:45 by caguillo         ###   ########.fr       */
+/*   Updated: 2025/06/10 01:50:59 by caguillo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@ let ballRadius = 10;
 let d = -2;
 let x = canvas.width / 2;
 let y = canvas.height / 2;
-const ballSpeed = 3;
+const ballSpeed = 8;
+const padSpeed = 8;
 let dx = ballSpeed; //* getRandomSign();
 let dy = ballSpeed; //* getRandomSign();
 let signX = getRandomSign();
@@ -34,7 +35,6 @@ let loose1 = false;
 let loose2 = false;
 let padTouch1 = false;
 let padTouch2 = false;
-const padSpeed = 3;
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 // let isWall = true;
@@ -76,16 +76,16 @@ function draw() {
 	drawPaddles();
 	// if (isWall === true)	 
 	// 	drawWall();		
-		
+	
 	// check
 	if (x + ballRadius >= canvas.width) // - paddleWidth)
 		loose2 = true; // signX = -signX;
 	else if (x - ballRadius <= 0) //paddleWidth)
 		loose1 = true; // signX = -signX;
-	else if (y + ballRadius == canvas.height || y - ballRadius == 0)
+	else if (y + ballRadius >= canvas.height || y - ballRadius <= 0)
 	{
-		signY = -signY;
-		// signX = getRandomSign();	--> option
+		signY = -signY;		// signX = getRandomSign();	--> option
+		
 	}	
 	else if (distBallPad2(x, y) <= 0) 
 	{
@@ -150,8 +150,11 @@ function draw() {
 		signY = getRandomSign();
 	}
 	padMovement();	
-	requestAnimationFrame(draw);
+	// requestAnimationFrame(draw);
 }
+
+setInterval(draw, 40);
+// draw();
 
 function padMovement()
 {
@@ -207,8 +210,7 @@ function keyUpHandler(e) {
   }
 }
 
-// setInterval(draw, 20);
-draw();
+
 
 function getRandomIntInclusive(min, max)
 {
