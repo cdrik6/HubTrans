@@ -32,8 +32,10 @@ fastify.ready().then(() => {
             try {
                 const data = JSON.parse(clt_msg);
                 console.log('pad1:', data.p1);
-                console.log('pad2:', data.p2);				
-				paddlesY(data.p1, data.p2);
+                console.log('pad2:', data.p2);
+				paddle1Y = data.p1;
+				paddle2Y = data.p2;
+				// paddlesY(data.p1, data.p2);
             }
             catch (e) {
                 console.error('Invalid JSON from client');
@@ -44,7 +46,7 @@ fastify.ready().then(() => {
             console.log('Server: Client disconnected');
         });
         //        
-		setInterval( () => { clt_skt.send(JSON.stringify(play())) }, fps);		
+		setInterval( () => { clt_skt.send(JSON.stringify(play())) }, fps);
     });
 
     server.listen(3000, () => {
@@ -79,25 +81,25 @@ const fps = 40;
 let paddle1Y = (canvasHeight - paddleHeight) / 2; 
 let paddle2Y = (canvasHeight - paddleHeight) / 2;
 let gameState = {
-	ball: {x:x, y:y},
-	paddle: {p1:paddle1Y, p2:paddle2Y}
+	ball: {x:x, y:y}
+	// paddle: {p1:paddle1Y, p2:paddle2Y}
 	//score: {p1:1, p2:2}
 }
-const padSpeed = 6;
+// const padSpeed = 6;
 
-function paddlesY(pad1, pad2)
-{
-	if (pad2 === "up" && paddle2Y > 0)		
-		paddle2Y -= padSpeed;
-	if (pad2 === "down" && paddle2Y + paddleHeight < canvasHeight)		
-		paddle2Y += padSpeed;
-	if (pad1 === "up" && paddle1Y > 0 )	
-		paddle1Y -= padSpeed;
-	if (pad1 === "down" && paddle1Y + paddleHeight < canvasHeight)	
-		paddle1Y += padSpeed;	
-	gameState.paddle.p2 = paddle2Y;
-	gameState.paddle.p1 = paddle1Y;
-}
+// function paddlesY(pad1, pad2)
+// {
+// 	if (pad2 === "up" && paddle2Y > 0)		
+// 		paddle2Y -= padSpeed;
+// 	if (pad2 === "down" && paddle2Y + paddleHeight < canvasHeight)		
+// 		paddle2Y += padSpeed;
+// 	if (pad1 === "up" && paddle1Y > 0 )	
+// 		paddle1Y -= padSpeed;
+// 	if (pad1 === "down" && paddle1Y + paddleHeight < canvasHeight)	
+// 		paddle1Y += padSpeed;	
+// 	gameState.paddle.p2 = paddle2Y;
+// 	gameState.paddle.p1 = paddle1Y;
+// }
 // gameState.pad = {p1:paddle1Y, p2:paddle2Y};	
 
 

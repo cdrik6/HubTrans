@@ -36,7 +36,7 @@ const ballRadius = 10;
 const paddleHeight = 80;
 const paddleWidth = 3 * ballRadius / 2;
 // let paddles = {pad: {p1:paddle1Y, p2:paddle2Y} }
-let paddle = {p1:"o", p2:"o"};
+let paddle = {p1:"", p2:""};
 
 // document.addEventListener("keydown", keyDownHandler, false);
 // document.addEventListener("keyup", keyUpHandler, false);
@@ -48,7 +48,7 @@ document.addEventListener("keydown", (event) => {
 
 document.addEventListener("keyup", (event) => {
 	upHandler(event);
-	clt_wskt.send(JSON.stringify(paddle));	
+	// clt_wskt.send(JSON.stringify(paddle));	
 }, false);
 
 
@@ -69,16 +69,16 @@ function downHandler(e) {
 
 function upHandler(e) {
   if (e.key == "Up" || e.key == "ArrowUp") {
-    paddle.p2 = "o";
+    paddle.p2 = "";
   }
   else if (e.key == "Down" || e.key == "ArrowDown") {
-    paddle.p2 = "o";
+    paddle.p2 = "";
   }
   else if (e.key == "w") {
-    paddle.p1 = "o";
+    paddle.p1 = "";
   }
   else if (e.key == "x") {
-    paddle.p1 = "o";
+    paddle.p1 = "";
   }
 }
 
