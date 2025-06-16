@@ -68,7 +68,7 @@ const ballRadius = 10; const paddleHeight = 80; const paddleWidth = 3 * ballRadi
 // let upPressed1 = false; let downPressed1 = false; let upPressed2 = false; let downPressed2 = false;
 let x = canvasWidth / 2;
 let y = canvasHeight / 2;
-const ballSpeed = 6;
+const ballSpeed = 3;
 let dx = ballSpeed;
 let dy = ballSpeed;
 let signX = getRandomSign();
@@ -77,7 +77,7 @@ let loose1 = false;
 let loose2 = false;
 let padTouch1 = false;
 let padTouch2 = false;
-const fps = 40;
+const fps = 10;
 let paddle1Y = (canvasHeight - paddleHeight) / 2; 
 let paddle2Y = (canvasHeight - paddleHeight) / 2;
 let gameState = {

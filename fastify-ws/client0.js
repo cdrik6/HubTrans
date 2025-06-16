@@ -132,27 +132,27 @@ function draw(x,y) {
 function padMovement()
 {
 	if (upPressed2 === true && paddle2Y > 0 )
-  {  
-	  paddle2Y = paddle2Y - padSpeed;
-    paddle.p2 = paddle2Y;
-	  clt_wskt.send(JSON.stringify(paddle));
+  	{  
+		paddle2Y = paddle2Y - padSpeed;
+    	paddle.p2 = paddle2Y;
+	  	clt_wskt.send(JSON.stringify(paddle));
 	}
 	if (downPressed2 === true && paddle2Y + paddleHeight < canvas.height )
-  {  
+  	{  
 		paddle2Y = paddle2Y + padSpeed;
-    paddle.p2 = paddle2Y;
+    	paddle.p2 = paddle2Y;
 		clt_wskt.send(JSON.stringify(paddle));
 	}
 	if (upPressed1 === true && paddle1Y > 0 )
-  { 
+  	{ 
 		paddle1Y = paddle1Y - padSpeed;
-    paddle.p1 = paddle1Y;
+    	paddle.p1 = paddle1Y;
 		clt_wskt.send(JSON.stringify(paddle));
 	}
 	if (downPressed1 === true && paddle1Y + paddleHeight < canvas.height )
-  {
+  	{
 		paddle1Y = paddle1Y + padSpeed;
-    paddle.p1 = paddle1Y;
+    	paddle.p1 = paddle1Y;
 		clt_wskt.send(JSON.stringify(paddle));
 	}
 	// paddle = {p1:paddle1Y, p2:paddle2Y}  

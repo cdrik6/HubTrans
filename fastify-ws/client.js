@@ -6,7 +6,7 @@ clt_wskt.addEventListener('close', () => {
 });
 
 clt_wskt.addEventListener('error', err => {
-output.textContent += 'Error: ' + err + '\n';
+  output.textContent += 'Error: ' + err + '\n';
 });
 
 clt_wskt.addEventListener('open', () => {
@@ -17,10 +17,10 @@ clt_wskt.addEventListener('open', () => {
 clt_wskt.addEventListener('message', event => {
 	try {
 		const data = JSON.parse(event.data);
-		console.log('Ball position:', data.ball.x, data.ball.y);
-		console.log('Pad position:', data.paddle.p1, data.paddle.p2);
+		// console.log('Ball position:', data.ball.x, data.ball.y);
+		// console.log('Pad position:', data.paddle.p1, data.paddle.p2);
 		// drawBall(data.ball.x, data.ball.y)
-		//console.log('Score P2:', data.score.p2);
+		// console.log('Score P2:', data.score.p2);
 		draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2);
 		// clt_wskt.send(JSON.stringify(paddles));
 	}
@@ -35,52 +35,129 @@ let ctx = canvas.getContext("2d");
 const ballRadius = 10;
 const paddleHeight = 80;
 const paddleWidth = 3 * ballRadius / 2;
+let upPressed1 = false;
+let downPressed1 = false;
+let upPressed2 = false;
+let downPressed2 = false;
 // let paddles = {pad: {p1:paddle1Y, p2:paddle2Y} }
 let paddle = {p1:"", p2:""};
 
-// document.addEventListener("keydown", keyDownHandler, false);
-// document.addEventListener("keyup", keyUpHandler, false);
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
 
-document.addEventListener("keydown", (event) => {
-	downHandler(event);
-	clt_wskt.send(JSON.stringify(paddle));	
-}, false);
+// document.addEventListener("keydown", (event) => {
+// 	downHandler(event);
+// 	clt_wskt.send(JSON.stringify(paddle));	
+// }, false);
 
-document.addEventListener("keyup", (event) => {
-	upHandler(event);
-	// clt_wskt.send(JSON.stringify(paddle));	
-}, false);
+// document.addEventListener("keyup", (event) => {
+// 	upHandler(event);
+// 	//clt_wskt.send(JSON.stringify(paddle));	
+// }, false);
 
 
-function downHandler(e) {
-  if (e.key == "Up" || e.key == "ArrowUp") {
-    paddle.p2 = "up";
-  }
-  else if (e.key == "Down" || e.key == "ArrowDown") {
-    paddle.p2 = "down";
-  }
-  else if (e.key == "w") {
-    paddle.p1 = "up";
-  }
-  else if (e.key == "x") {
-    paddle.p1 = "down";
-  }  
+// function downHandler(e) {
+//   if (e.key == "Up" || e.key == "ArrowUp") {
+//     paddle.p2 = "up";
+//   }
+//   else if (e.key == "Down" || e.key == "ArrowDown") {
+//     paddle.p2 = "down";
+//   }
+//   else if (e.key == "w") {
+//     paddle.p1 = "up";
+//   }
+//   else if (e.key == "x") {
+//     paddle.p1 = "down";
+//   }  
+// }
+
+// function upHandler(e) {
+//   if (e.key == "Up" || e.key == "ArrowUp") {
+//     paddle.p2 = "";
+//   }
+//   else if (e.key == "Down" || e.key == "ArrowDown") {
+//     paddle.p2 = "";
+//   }
+//   else if (e.key == "w") {
+//     paddle.p1 = "";
+//   }
+//   else if (e.key == "x") {
+//     paddle.p1 = "";
+//   }
+// }
+
+
+function padMovement()
+{
+	if (upPressed2 === true)// && paddle2Y > 0 )
+  {  
+	  	// paddle2Y = paddle2Y - padSpeed;
+    	// paddle.p2 = paddle2Y;
+      paddle.p2 = "up";
+	  	clt_wskt.send(JSON.stringify(paddle));
+	}
+	if (downPressed2 === true) //&& paddle2Y + paddleHeight < canvas.height )
+  {  
+	  	// paddle2Y = paddle2Y + padSpeed;
+    	// paddle.p2 = paddle2Y;
+      paddle.p2 = "down";
+		  clt_wskt.send(JSON.stringify(paddle));
+	}
+	if (upPressed1 === true) //&& paddle1Y > 0 )
+  { 
+		  // paddle1Y = paddle1Y - padSpeed;
+    	// paddle.p1 = paddle1Y;
+      paddle.p1 = "up";
+		  clt_wskt.send(JSON.stringify(paddle));
+	}
+	if (downPressed1 === true ) //&& paddle1Y + paddleHeight < canvas.height )
+  {
+	  	// paddle1Y = paddle1Y + padSpeed;
+    	// paddle.p1 = paddle1Y;
+      paddle.p1 = "down";
+		  clt_wskt.send(JSON.stringify(paddle));
+	}
+	// paddle = {p1:paddle1Y, p2:paddle2Y}  
 }
 
-function upHandler(e) {
-  if (e.key == "Up" || e.key == "ArrowUp") {
-    paddle.p2 = "";
+function keyDownHandler(e) {
+  if (e.key === "Up" || e.key === "ArrowUp") {
+    upPressed2 = true;    
   }
-  else if (e.key == "Down" || e.key == "ArrowDown") {
-    paddle.p2 = "";
+  else if (e.key === "Down" || e.key === "ArrowDown") {
+    downPressed2 = true;	
   }
-  else if (e.key == "w") {
-    paddle.p1 = "";
+  else if (e.key === "w") {
+    upPressed1 = true;	
   }
-  else if (e.key == "x") {
-    paddle.p1 = "";
+  else if (e.key === "x") {
+    downPressed1 = true;	
   }
 }
+
+function keyUpHandler(e) {
+  if (e.key === "Up" || e.key === "ArrowUp") {
+    upPressed2 = false;
+  }
+  else if (e.key === "Down" || e.key === "ArrowDown") {
+    downPressed2 = false;
+  }
+  else if (e.key === "w") {
+    upPressed1 = false;	
+  }
+  else if (e.key === "x") {
+    downPressed1 = false;	
+  }
+}
+
+
+
+/* Note: Event name
+"open" = When the connection is established
+"message" = When a message is received
+"error" = When there's an error
+"close" = When the connection closes
+*/
 
 function drawBall(x, y) {	
 	ctx.beginPath();		
@@ -103,85 +180,8 @@ function draw(x,y, p1Y, p2Y) {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);	  		
 	drawBall(x,y);
 	drawPaddles(p1Y, p2Y);
-	// padMovement();	
+	padMovement();	
 	//requestAnimationFrame(draw);
 }
-
 // setInterval(draw, 50);
 // draw();
-
-
-
-
-
-/* Note: Event name
-"open" = When the connection is established
-"message" = When a message is received
-"error" = When there's an error
-"close" = When the connection closes
-*/
-
-
-// function padMovement()
-// {
-// 	if (upPressed2 == true)
-// 	{
-// 		if (paddle2Y > 0 )
-// 			paddle2Y = paddle2Y - padSpeed;
-// 		clt_wskt.send(JSON.stringify(paddles));
-// 	}
-// 	if (downPressed2 == true)
-// 	{
-// 		if (paddle2Y + paddleHeight < canvas.height )
-// 			paddle2Y = paddle2Y + padSpeed;
-// 		clt_wskt.send(JSON.stringify(paddles));
-// 	}
-// 	if (upPressed1 == true)
-// 	{
-// 		if (paddle1Y > 0 )
-// 			paddle1Y = paddle1Y - padSpeed;
-// 		clt_wskt.send(JSON.stringify(paddles));
-// 	}
-// 	if (downPressed1 == true)
-// 	{
-// 		if (paddle1Y + paddleHeight < canvas.height )
-// 			paddle1Y = paddle1Y + padSpeed;
-// 		clt_wskt.send(JSON.stringify(paddles));
-// 	}
-// 	paddles = {pad: {p1:paddle1Y, p2:paddle2Y} }
-// 	// clt_wskt.addEventListener('open', () => {
-// 	// 	// output.textContent += 'Connected to WebSocket\n';
-// 	// 	// clt_wskt.send('Hello from client');
-		
-// 	// });
-// }
-
-// function keyDownHandler(e) {
-//   if (e.key == "Up" || e.key == "ArrowUp") {
-//     upPressed2 = true;
-//   }
-//   else if (e.key == "Down" || e.key == "ArrowDown") {
-//     downPressed2 = true;	
-//   }
-//   else if (e.key == "w") {
-//     upPressed1 = true;	
-//   }
-//   else if (e.key == "x") {
-//     downPressed1 = true;	
-//   }
-// }
-
-// function keyUpHandler(e) {
-//   if (e.key == "Up" || e.key == "ArrowUp") {
-//     upPressed2 = false;
-//   }
-//   else if (e.key == "Down" || e.key == "ArrowDown") {
-//     downPressed2 = false;
-//   }
-//   else if (e.key == "w") {
-//     upPressed1 = false;	
-//   }
-//   else if (e.key == "x") {
-//     downPressed1 = false;	
-//   }
-// }
