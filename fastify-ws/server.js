@@ -1,3 +1,43 @@
+/***************************************************************************************/
+/************************************** variables declaration for PONG *****************/
+/***************************************************************************************/
+
+let canvasHeight = 320; //--> to be catched ******************************//
+let canvasWidth = 480; //--> to be catched ******************************//
+let ballRadius = canvasHeight / 40;
+let paddleHeight = canvasHeight / 4;
+let paddleWidth = 3 * ballRadius / 2;
+const ballSpeed = 3;
+const padSpeed = 6;
+const fps = 10; // frequence for interval
+let dx = ballSpeed;
+let dy = ballSpeed;
+let signX = getRandomSign();
+let signY = getRandomSign();
+let lost1 = false;
+let lost2 = false;
+let paddle1Y = (canvasHeight - paddleHeight) / 2; 
+let paddle2Y = (canvasHeight - paddleHeight) / 2;
+let padTouch1 = false;
+let padTouch2 = false;
+let x = canvasWidth / 2;
+let y = canvasHeight / 2;
+let gameState = {
+	ball: {x:x, y:y},
+	paddle: {p1:paddle1Y, p2:paddle2Y}
+	//score: {p1:1, p2:2}
+}
+let settings = {
+	ballRadius:ballRadius,
+	paddleHeight:paddleHeight,
+	paddleWidth:paddleWidth
+}
+
+
+/***************************************************************************************/
+/*************************** Server Fastify ********************************************/
+/***************************************************************************************/
+
 const fastify = require('fastify')();
 // const ws = require('ws');
 // const WebSocketServer = ws.WebSocketServer;
@@ -27,13 +67,24 @@ fastify.ready().then(() => {
         //
         clt_skt.on('message', clt_msg => {           
             console.log('Server received:', clt_msg.toString());
-            // paddles from client
-			//  let data;
-            try {
+            // paddles from client			
+            try
+			{
                 const data = JSON.parse(clt_msg);
-                console.log('pad1:', data.p1);
-                console.log('pad2:', data.p2);				
-				paddlesY(data.p1, data.p2);
+				if ('p1' in data && 'p2' in data)
+				{
+					console.log('pad1:', data.p1);
+					console.log('pad2:', data.p2);				
+					paddlesY(data.p1, data.p2);
+				}
+				if ('w' in data && 'h' in data)
+				{
+					console.log('w:', data.w);
+					console.log('h:', data.h);				
+					sizePlayground(data.w, data.h)
+					console.log(settings);
+					clt_skt.send(JSON.stringify(settings))
+				}	
             }
             catch (e) {
                 console.error('Invalid JSON from client');
@@ -52,40 +103,25 @@ fastify.ready().then(() => {
     });
 });  
 
-// fastify.listen({port:3000}, (err, address) => {
-//     if(err) {
-//         console.error(err);
-//         process.exit(1);
-//     }
-//     console.log(`Server listening at: ${address}`);    
-// });
 
-/************************************************************************************** */
-const canvasHeight = 320; const canvasWidth = 480;
-//--> to be catched ******************************//
-const ballRadius = 10; const paddleHeight = 80; const paddleWidth = 3 * ballRadius / 2;
-// let upPressed1 = false; let downPressed1 = false; let upPressed2 = false; let downPressed2 = false;
-let x = canvasWidth / 2;
-let y = canvasHeight / 2;
-const ballSpeed = 3;
-let dx = ballSpeed;
-let dy = ballSpeed;
-let signX = getRandomSign();
-let signY = getRandomSign();
-let loose1 = false;
-let loose2 = false;
-let padTouch1 = false;
-let padTouch2 = false;
-const fps = 10;
-let paddle1Y = (canvasHeight - paddleHeight) / 2; 
-let paddle2Y = (canvasHeight - paddleHeight) / 2;
-let gameState = {
-	ball: {x:x, y:y},
-	paddle: {p1:paddle1Y, p2:paddle2Y}
-	//score: {p1:1, p2:2}
+/***************************************************************************************/
+/*************************** Pong game *************************************************/
+/***************************************************************************************/
+
+function sizePlayground(width, height)
+{
+	canvasHeight = height;
+	canvasWidth = width;
+	ballRadius = canvasHeight / 40;
+	paddleHeight = canvasHeight / 4;
+	paddleWidth = 3 * ballRadius / 2;
+	settings.ballRadius = ballRadius;
+	settings.paddleHeight = paddleHeight;
+	settings.paddleWidth = paddleWidth;
+	console.log(settings.ballRadius);	
 }
-const padSpeed = 6;
 
+// get paddles movements from client
 function paddlesY(pad1, pad2)
 {
 	if (pad2 === "up" && paddle2Y > 0)	// does not go under limit because moved before of padSpeed	
@@ -101,13 +137,14 @@ function paddlesY(pad1, pad2)
 }
 // gameState.pad = {p1:paddle1Y, p2:paddle2Y};	
 
-
-function play() {
+// playing pong
+function play()
+{	
     // check
 	if (x + ballRadius >= canvasWidth)
-		loose2 = true;
+		lost2 = true;
 	else if (x - ballRadius <= 0)
-		loose1 = true;
+		lost1 = true;
 	else if (y + ballRadius >= canvasHeight || y - ballRadius <= 0)	
 		signY = -signY;		
 	else if (distBallPad2(x, y) <= 0) 
@@ -131,7 +168,7 @@ function play() {
 			padTouch1 = false;				
 	}	
     // next
-	if (!loose1 && !loose2)
+	if (!lost1 && !lost2)
 	{
 		x = x + signX*dx;
 		y = y + signY*dy;		
@@ -140,8 +177,8 @@ function play() {
 	{
 		x = canvasWidth / 2;
 		y = canvasHeight / 2;
-		loose1 = false;
-		loose2 = false;		
+		lost1 = false;
+		lost2 = false;		
 		signX = getRandomSign();
 		signY = getRandomSign();
 	}
@@ -149,23 +186,22 @@ function play() {
     gameState.ball.x  = x
 	gameState.ball.y  = y
 	// console.log(gameState);
-	return (gameState);
-    // clt_skt.send(JSON.stringify(gameState));    
+	return (gameState);    
 	//requestAnimationFrame(draw);
 }
-
 // setInterval(play, 50);
 
-/******
-************** tools  
-************/
 
+/***************************************************************************************/
+/*************************** Tools *****************************************************/
+/***************************************************************************************/
 
+// The maximum is inclusive and the minimum is inclusive
 function getRandomIntInclusive(min, max)
 {
   const minCeiled = Math.ceil(min);
   const maxFloored = Math.floor(max);
-  return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); // The maximum is inclusive and the minimum is inclusive
+  return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled);   
 }
 
 function getRandomSign()
@@ -202,69 +238,3 @@ function distBallPad1(xB, yB)
 	if (yB < paddle1Y)
 		return (Math.sqrt((xB - xP) * (xB - xP) + (yB - paddle1Y) * (yB - paddle1Y)) - ballRadius);		
 }
-
-
-
-// function padMovement()
-// {
-// 	if (upPressed2 == true)
-// 	{
-// 		if (paddle2Y > 0 )
-// 			paddle2Y = paddle2Y - padSpeed;
-// 		clt_wskt.send(JSON.stringify(paddles));
-// 	}
-// 	if (downPressed2 == true)
-// 	{
-// 		if (paddle2Y + paddleHeight < canvas.height )
-// 			paddle2Y = paddle2Y + padSpeed;
-// 		clt_wskt.send(JSON.stringify(paddles));
-// 	}
-// 	if (upPressed1 == true)
-// 	{
-// 		if (paddle1Y > 0 )
-// 			paddle1Y = paddle1Y - padSpeed;
-// 		clt_wskt.send(JSON.stringify(paddles));
-// 	}
-// 	if (downPressed1 == true)
-// 	{
-// 		if (paddle1Y + paddleHeight < canvas.height )
-// 			paddle1Y = paddle1Y + padSpeed;
-// 		clt_wskt.send(JSON.stringify(paddles));
-// 	}
-// 	paddles = {pad: {p1:paddle1Y, p2:paddle2Y} }
-// 	// clt_wskt.addEventListener('open', () => {
-// 	// 	// output.textContent += 'Connected to WebSocket\n';
-// 	// 	// clt_wskt.send('Hello from client');
-		
-// 	// });
-// }
-
-// function keyDownHandler(e) {
-//   if (e.key == "Up" || e.key == "ArrowUp") {
-//     upPressed2 = true;
-//   }
-//   else if (e.key == "Down" || e.key == "ArrowDown") {
-//     downPressed2 = true;	
-//   }
-//   else if (e.key == "w") {
-//     upPressed1 = true;	
-//   }
-//   else if (e.key == "x") {
-//     downPressed1 = true;	
-//   }
-// }
-
-// function keyUpHandler(e) {
-//   if (e.key == "Up" || e.key == "ArrowUp") {
-//     upPressed2 = false;
-//   }
-//   else if (e.key == "Down" || e.key == "ArrowDown") {
-//     downPressed2 = false;
-//   }
-//   else if (e.key == "w") {
-//     upPressed1 = false;	
-//   }
-//   else if (e.key == "x") {
-//     downPressed1 = false;	
-//   }
-// }
