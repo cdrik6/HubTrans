@@ -11,7 +11,6 @@ let downPressed2 = false;
 let paddle = {p1:"", p2:""};
 let canvasSize = {w:canvas.width, h:canvas.height};
 
-
 /**************************** ws  *****************************/
 const output = document.getElementById('output');
 const clt_wskt = new WebSocket('ws://localhost:3000/pong');
@@ -21,7 +20,7 @@ clt_wskt.addEventListener('close', () => {
 });
 
 clt_wskt.addEventListener('error', err => {
-  output.textContent += 'Error: ' + err + '\n';
+	output.textContent += 'Error: ' + err + '\n';
 });
 
 clt_wskt.addEventListener('open', () => {
@@ -34,13 +33,13 @@ clt_wskt.addEventListener('message', event => {
 	try
 	{
 		const data = JSON.parse(event.data);
-		console.log(data);
+		console.log(data);		
 		// console.log('Ball position:', data.ball.x, data.ball.y);
 		// console.log('Pad position:', data.paddle.p1, data.paddle.p2);		
 		// console.log('Score P2:', data.score.p2);		
-		if ('ball' in data && 'ball' in data && 'paddle' in data && 'paddle' in data 
-			&& 'x' in data.ball && 'y' in data.ball && 'p1' in data.paddle && 'p2' in data.paddle);
+		if ('ball' in data && 'paddle' in data  && 'x' in data.ball && 'y' in data.ball && 'p1' in data.paddle && 'p2' in data.paddle);
 			draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2);
+		// output.textContent += 'la\n';	
 		if ('ballRadius' in data && 'paddleHeight' in data && 'paddleWidth' in data)
 		{
 			
