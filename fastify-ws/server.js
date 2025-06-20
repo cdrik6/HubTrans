@@ -27,11 +27,7 @@ let gameState = {
 	paddle: {p1:paddle1Y, p2:paddle2Y}
 	//score: {p1:1, p2:2}
 }
-let settings = {
-	ballRadius:ballRadius,
-	paddleHeight:paddleHeight,
-	paddleWidth:paddleWidth
-}
+let settings = { bR:ballRadius, pH:paddleHeight, pW:paddleWidth }
 
 
 /***************************************************************************************/
@@ -77,7 +73,7 @@ fastify.ready().then(() => {
 					console.log('pad2:', data.p2);				
 					paddlesY(data.p1, data.p2);
 				}
-				if ('w' in data && 'h' in data)
+				else if ('w' in data && 'h' in data)
 				{
 					console.log('w:', data.w);
 					console.log('h:', data.h);				
@@ -115,10 +111,10 @@ function sizePlayground(width, height)
 	ballRadius = canvasHeight / 40;
 	paddleHeight = canvasHeight / 4;
 	paddleWidth = 3 * ballRadius / 2;
-	settings.ballRadius = ballRadius;
-	settings.paddleHeight = paddleHeight;
-	settings.paddleWidth = paddleWidth;
-	console.log(settings.ballRadius);	
+	settings.bR = ballRadius;
+	settings.pH = paddleHeight;
+	settings.pW = paddleWidth;
+	console.log(settings.bR);	
 }
 
 // get paddles movements from client

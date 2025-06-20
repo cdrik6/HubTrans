@@ -40,13 +40,13 @@ clt_wskt.addEventListener('message', event => {
 		if ('ball' in data && 'paddle' in data  && 'x' in data.ball && 'y' in data.ball && 'p1' in data.paddle && 'p2' in data.paddle);
 			draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2);
 		// output.textContent += 'la\n';	
-		if ('ballRadius' in data && 'paddleHeight' in data && 'paddleWidth' in data)
+		if ('bR' in data && 'pH' in data && 'pW' in data)
 		{
 			
 			output.textContent += 'ici\n';
-			ballRadius = data.ballRadius;
-			paddleHeight = data.paddleHeight;
-			paddleWidth = data.paddleWidth;
+			ballRadius = data.bR;
+			paddleHeight = data.pH;
+			paddleWidth = data.pW;
 			output.textContent += ballRadius + '\n';
 			output.textContent += paddleHeight + '\n';
 			output.textContent += paddleWidth + '\n';
