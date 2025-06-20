@@ -9,7 +9,7 @@ let paddleHeight = canvasHeight / 4;
 let paddleWidth = 3 * ballRadius / 2;
 const ballSpeed = 3;
 const padSpeed = 6;
-const fps = 10; // frequence for interval
+const fps = 10; // frequence for setInterval
 let dx = ballSpeed;
 let dy = ballSpeed;
 let signX = getRandomSign();
@@ -34,14 +34,18 @@ let settings = { bR:ballRadius, pH:paddleHeight, pW:paddleWidth }
 /*************************** Server Fastify ********************************************/
 /***************************************************************************************/
 
-const fastify = require('fastify')();
+// const fastify = require('fastify')();
+import fastify from 'fastify';
+const fast = fastify();
 // const ws = require('ws');
 // const WebSocketServer = ws.WebSocketServer;
-const { WebSocketServer } = require('ws'); // just the WebSocketServer part of the ws module
-const http = require('http');
+// const { WebSocketServer } = require('ws'); // just the WebSocketServer part of the ws module
+import { WebSocketServer } from 'ws';
+// const http = require('http');
+import http from 'http';
 
 // http route
-fastify.get('/hello', async (request, reply) => {
+fast.get('/hello', async (request, reply) => {
         const toto = request.query.toto || 'titi';
         reply.send({ message: `Hello ${toto}!` }); 
     }
@@ -49,19 +53,27 @@ fastify.get('/hello', async (request, reply) => {
 
 // http server from Fastify who will manage http requests so far
 // const server = http.createServer(fastify); // --> not good, only for express
-fastify.ready().then(() => {
+fast.ready().then(() => {
   
     const server = http.createServer((req, res) => {
-        fastify.routing(req, res);
+        fast.routing(req, res);
     });
     
     // bind websocketserver to the http server
     const srv_wskt = new WebSocketServer({ server , path: '/pong' });
-    
+    let clts = new Set();
+
     srv_wskt.on('connection', (clt_skt, res) => {        
         console.log('Server: Client connected');
-        //
-        clt_skt.on('message', clt_msg => {           
+		if (clts.size < 2) // 2 players max --> check multiplayer version
+			clts.add(clt_skt);
+		//
+		clt_skt.on('close', () => {
+            console.log('Server: Client disconnected');
+			clts.delete(clt_skt);
+        });
+		//
+		clt_skt.on('message', clt_msg => {           
             console.log('Server received:', clt_msg.toString());
             // paddles from client			
 			const data = JSON.parse(clt_msg);
@@ -85,18 +97,22 @@ fastify.ready().then(() => {
             catch (e) {
                 console.error('Invalid JSON from client');
             }
-        });
-        //
-        clt_skt.on('close', () => {
-            console.log('Server: Client disconnected');
-        });
-        //        
-		setInterval( () => { clt_skt.send(JSON.stringify(play())) }, fps);		
-    });
+        });                
+	});	
+	
+	setInterval( () => 
+	{
+		const frame = JSON.stringify(play());
+		for (let clt_skt of clts)
+		{
+			if (clt_skt.readyState === clt_skt.OPEN)
+				clt_skt.send(frame);
+		};		
+	}, fps);
 
     server.listen(3000, () => {
         console.log("Server listening");
-    });
+    });	
 });  
 
 
