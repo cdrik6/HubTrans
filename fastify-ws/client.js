@@ -37,13 +37,10 @@ clt_wskt.addEventListener('message', event => {
 		// console.log('Ball position:', data.ball.x, data.ball.y);
 		// console.log('Pad position:', data.paddle.p1, data.paddle.p2);		
 		// console.log('Score P2:', data.score.p2);		
-		if ('ball' in data && 'paddle' in data  && 'x' in data.ball && 'y' in data.ball && 'p1' in data.paddle && 'p2' in data.paddle);
-			draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2);
-		// output.textContent += 'la\n';	
+		if ('ball' in data && 'paddle' in data  && 'x' in data.ball && 'y' in data.ball && 'p1' in data.paddle && 'p2' in data.paddle)
+			draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2);		
 		if ('bR' in data && 'pH' in data && 'pW' in data)
-		{
-			
-			output.textContent += 'ici\n';
+		{				
 			ballRadius = data.bR;
 			paddleHeight = data.pH;
 			paddleWidth = data.pW;
@@ -56,8 +53,6 @@ clt_wskt.addEventListener('message', event => {
 		console.error('Invalid JSON received:', event.data);
 	}		
 });
-
-
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
@@ -111,43 +106,43 @@ function padMovement()
 		paddle.p1 = "up";
 	  	clt_wskt.send(JSON.stringify(paddle));
 	}
-	if (upPressed2 === true && upPressed1 === false)
+	else if (upPressed2 === true && upPressed1 === false)
   	{  	  
       	paddle.p2 = "up";
 		paddle.p1 = "";
 	  	clt_wskt.send(JSON.stringify(paddle));
 	}
-	if (upPressed2 === false && upPressed1 === true)
+	else if (upPressed2 === false && upPressed1 === true)
   	{  	  
       	paddle.p2 = "";
 		paddle.p1 = "up";
 	  	clt_wskt.send(JSON.stringify(paddle));
 	}
-	if (downPressed2 === true  && downPressed1 === true)
+	else if (downPressed2 === true  && downPressed1 === true)
   	{  	  
       	paddle.p2 = "down";
 		paddle.p1 = "down";
 	  	clt_wskt.send(JSON.stringify(paddle));
 	}
-	if (downPressed2 === true && downPressed1 === false)
+	else if (downPressed2 === true && downPressed1 === false)
   	{  	  
       	paddle.p2 = "down";
 		paddle.p1 = "";
 	  	clt_wskt.send(JSON.stringify(paddle));
 	}	
-	if (downPressed2 === false && downPressed1 === true)
+	else if (downPressed2 === false && downPressed1 === true)
   	{  	  
       	paddle.p2 = "";
 		paddle.p1 = "down";
 	  	clt_wskt.send(JSON.stringify(paddle));
 	}	
-	if (upPressed2 === true && downPressed1 === true)
+	else if (upPressed2 === true && downPressed1 === true)
   	{  	  
       	paddle.p2 = "up";
 		paddle.p1 = "down";
 	  	clt_wskt.send(JSON.stringify(paddle));
 	}
-	if (downPressed2 === true && upPressed1 === true)
+	else if (downPressed2 === true && upPressed1 === true)
   	{  	  
       	paddle.p2 = "down";
 		paddle.p1 = "up";

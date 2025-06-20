@@ -64,9 +64,9 @@ fastify.ready().then(() => {
         clt_skt.on('message', clt_msg => {           
             console.log('Server received:', clt_msg.toString());
             // paddles from client			
+			const data = JSON.parse(clt_msg);
             try
-			{
-                const data = JSON.parse(clt_msg);
+			{                
 				if ('p1' in data && 'p2' in data)
 				{
 					console.log('pad1:', data.p1);
