@@ -2,11 +2,11 @@
 /************************************** variables declaration for PONG *****************/
 /***************************************************************************************/
 
-let canvasHeight = 320;
-let canvasWidth = 480;
+let canvasHeight = 320; //--> to be catched ******************************//
+let canvasWidth = 480; //--> to be catched ******************************//
 let ballRadius = canvasHeight / 40;
-let paddleHeight = canvasHeight / 5;
-let paddleWidth = 3 * canvasHeight / 80 // 3 * ballRadius / 2;
+let paddleHeight = canvasHeight / 4;
+let paddleWidth = 3 * ballRadius / 2;
 const ballSpeed = 3;
 const padSpeed = 6;
 const fps = 10; // frequence for setInterval
@@ -23,15 +23,11 @@ let padTouch2 = false;
 let x = canvasWidth / 2;
 let y = canvasHeight / 2;
 let gameState = {
-	ball: {x: x / canvasWidth, y: y / canvasHeight},
-	paddle: {p1: paddle1Y / canvasHeight, p2: paddle2Y / canvasHeight}
+	ball: {x:x, y:y},
+	paddle: {p1:paddle1Y, p2:paddle2Y}
 	//score: {p1:1, p2:2}
 }
-let settings = {
-	bR: ballRadius / canvasHeight,
-	pH: paddleHeight / canvasHeight,
-	pW: paddleWidth / canvasHeight
-}
+let settings = { bR:ballRadius, pH:paddleHeight, pW:paddleWidth }
 
 
 /***************************************************************************************/
@@ -69,8 +65,6 @@ fast.ready().then(() => {
 
     srv_wskt.on('connection', (clt_skt, res) => {        
         console.log('Server: Client connected');
-		clt_skt.send(JSON.stringify(settings))
-		console.log(settings);
 		if (clts.size < 2) // 2 players max --> check multiplayer version
 			clts.add(clt_skt);
 		//
@@ -91,14 +85,14 @@ fast.ready().then(() => {
 					console.log('pad2:', data.p2);				
 					paddlesY(data.p1, data.p2);
 				}
-				// else if ('w' in data && 'h' in data)
-				// {
-				// 	console.log('w:', data.w);
-				// 	console.log('h:', data.h);				
-				// 	sizePlayground(data.w, data.h)
-				// 	console.log(settings);
-				// 	clt_skt.send(JSON.stringify(settings))
-				// }	
+				else if ('w' in data && 'h' in data)
+				{
+					console.log('w:', data.w);
+					console.log('h:', data.h);				
+					sizePlayground(data.w, data.h)
+					console.log(settings);
+					clt_skt.send(JSON.stringify(settings))
+				}	
             }
             catch (e) {
                 console.error('Invalid JSON from client');
@@ -150,8 +144,8 @@ function paddlesY(pad1, pad2)
 		paddle1Y -= padSpeed;
 	if (pad1 === "down" && paddle1Y + paddleHeight < canvasHeight)	
 		paddle1Y += padSpeed;	
-	gameState.paddle.p2 = paddle2Y / canvasHeight;
-	gameState.paddle.p1 = paddle1Y / canvasHeight;
+	gameState.paddle.p2 = paddle2Y;
+	gameState.paddle.p1 = paddle1Y;
 }
 // gameState.pad = {p1:paddle1Y, p2:paddle2Y};	
 
@@ -201,8 +195,8 @@ function play()
 		signY = getRandomSign();
 	}
     //
-    gameState.ball.x  = x / canvasWidth;
-	gameState.ball.y  = y / canvasHeight;
+    gameState.ball.x  = x
+	gameState.ball.y  = y
 	// console.log(gameState);
 	return (gameState);    
 	//requestAnimationFrame(draw);

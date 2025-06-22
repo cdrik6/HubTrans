@@ -3,13 +3,13 @@ let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 let ballRadius = 10; // default
 let paddleHeight = 80; // default
-let paddleWidth = 3 * ballRadius / 2; // default
+let paddleWidth = 15; // 3 * ballRadius / 2; // default
 let upPressed1 = false;
 let downPressed1 = false;
 let upPressed2 = false;
 let downPressed2 = false;
 let paddle = {p1:"", p2:""};
-let canvasSize = {w:canvas.width, h:canvas.height};
+//  let canvasSize = {w:canvas.width, h:canvas.height};
 
 /**************************** ws  *****************************/
 const output = document.getElementById('output');
@@ -41,9 +41,9 @@ clt_wskt.addEventListener('message', event => {
 			draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2);		
 		if ('bR' in data && 'pH' in data && 'pW' in data)
 		{				
-			ballRadius = data.bR;
-			paddleHeight = data.pH;
-			paddleWidth = data.pW;
+			ballRadius = data.bR * canvas.height;
+			paddleHeight = data.pH * canvas.height;
+			paddleWidth = data.pW * canvas.height;
 			output.textContent += ballRadius + '\n';
 			output.textContent += paddleHeight + '\n';
 			output.textContent += paddleWidth + '\n';
@@ -215,7 +215,7 @@ function keyUpHandler(e)
 
 function drawBall(x, y) {	
 	ctx.beginPath();		
-	ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+	ctx.arc(x , y, ballRadius, 0, Math.PI * 2);
 	ctx.fillStyle = "rgba(255, 0, 0, 1)";
 	ctx.fill();	
 	ctx.closePath();		
@@ -232,8 +232,8 @@ function drawPaddles(paddle1Y, paddle2Y) {
 
 function draw(x,y, p1Y, p2Y) {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);	  		
-	drawBall(x,y);
-	drawPaddles(p1Y, p2Y);
+	drawBall(x * canvas.width,y * canvas.height);
+	drawPaddles(p1Y * canvas.height, p2Y * canvas.height);
 	padMovement();	
 	//requestAnimationFrame(draw);
 }
