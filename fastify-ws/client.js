@@ -9,6 +9,8 @@ let downPressed1 = false;
 let upPressed2 = false;
 let downPressed2 = false;
 let paddle = {p1:"", p2:""};
+let startGame = {start:false};
+
 //  let canvasSize = {w:canvas.width, h:canvas.height};
 
 /**************************** ws  *****************************/
@@ -26,7 +28,7 @@ clt_wskt.addEventListener('error', err => {
 clt_wskt.addEventListener('open', () => {
 	output.textContent += 'Connected to WebSocket\n';
 	// clt_wskt.send(JSON.stringify(paddle));
-	clt_wskt.send(JSON.stringify(canvasSize));
+	// clt_wskt.send(JSON.stringify(canvasSize));
 });
 
 clt_wskt.addEventListener('message', event => {
@@ -38,7 +40,7 @@ clt_wskt.addEventListener('message', event => {
 		// console.log('Pad position:', data.paddle.p1, data.paddle.p2);		
 		// console.log('Score P2:', data.score.p2);		
 		if ('ball' in data && 'paddle' in data  && 'x' in data.ball && 'y' in data.ball && 'p1' in data.paddle && 'p2' in data.paddle)
-			draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2);		
+			draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2, data.score.p1, data.score.p2);
 		if ('bR' in data && 'pH' in data && 'pW' in data)
 		{				
 			ballRadius = data.bR * canvas.height;
@@ -188,6 +190,13 @@ function keyDownHandler(e)
   else if (e.key === "x") {
     downPressed1 = true;	
   }
+  else if (e.key === "p") {
+	if (startGame.start === true)
+		startGame.start = false;			
+	else 	
+		startGame.start = true;		
+	clt_wskt.send(JSON.stringify(startGame));	
+  }
 }
 
 function keyUpHandler(e)
@@ -230,12 +239,31 @@ function drawPaddles(paddle1Y, paddle2Y) {
   ctx.closePath();
 }
 
-function draw(x,y, p1Y, p2Y) {
-	ctx.clearRect(0, 0, canvas.width, canvas.height);	  		
-	drawBall(x * canvas.width,y * canvas.height);
+function printScore(s1, s2) {
+	const text = " - "
+	ctx.font = "30px sans serif";
+	ctx.fillStyle = "rgba(0, 100, 0, 1)";
+	let pos = canvas.width/2 - ctx.measureText(text).width/2;	
+	ctx.fillText(text, pos, 40);
+	ctx.fillText(s1, pos - ctx.measureText(s1).width, 40);
+	ctx.fillText(s2, pos + ctx.measureText(text).width, 40);
+}
+
+function draw(x,y, p1Y, p2Y, s1, s2) {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);	
+	printScore(s1,s2);	
+	drawBall(x * canvas.width,y * canvas.height);	
 	drawPaddles(p1Y * canvas.height, p2Y * canvas.height);
 	padMovement();	
 	//requestAnimationFrame(draw);
 }
 // setInterval(draw, 50);
 // draw();
+
+// function draw(x,y, p1Y, p2Y) {
+// 	ctx.clearRect(0, 0, canvas.width, canvas.height);	  		
+// 	drawBall(x,y);
+// 	drawPaddles(p1Y, p2Y);
+// 	padMovement();	
+// 	//requestAnimationFrame(draw);
+// }

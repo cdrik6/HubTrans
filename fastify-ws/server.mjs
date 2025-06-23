@@ -9,7 +9,7 @@ let paddleHeight = canvasHeight / 5;
 let paddleWidth = 3 * canvasHeight / 80 // 3 * ballRadius / 2;
 const ballSpeed = 3;
 const padSpeed = 6;
-const fps = 10; // frequence for setInterval
+const tpf = 10; // frequence for setInterval
 let dx = ballSpeed;
 let dy = ballSpeed;
 let signX = getRandomSign();
@@ -22,16 +22,20 @@ let padTouch1 = false;
 let padTouch2 = false;
 let x = canvasWidth / 2;
 let y = canvasHeight / 2;
+let s1 = 0;
+let s2 = 0;
 let gameState = {
 	ball: {x: x / canvasWidth, y: y / canvasHeight},
-	paddle: {p1: paddle1Y / canvasHeight, p2: paddle2Y / canvasHeight}
-	//score: {p1:1, p2:2}
+	paddle: {p1: paddle1Y / canvasHeight, p2: paddle2Y / canvasHeight},
+	score: {p1:s1, p2:s2}
 }
 let settings = {
 	bR: ballRadius / canvasHeight,
 	pH: paddleHeight / canvasHeight,
 	pW: paddleWidth / canvasHeight
 }
+let intervalId = null;
+let startGame = false;
 
 
 /***************************************************************************************/
@@ -91,14 +95,29 @@ fast.ready().then(() => {
 					console.log('pad2:', data.p2);				
 					paddlesY(data.p1, data.p2);
 				}
-				// else if ('w' in data && 'h' in data)
-				// {
-				// 	console.log('w:', data.w);
-				// 	console.log('h:', data.h);				
-				// 	sizePlayground(data.w, data.h)
-				// 	console.log(settings);
-				// 	clt_skt.send(JSON.stringify(settings))
-				// }	
+				else if ('start' in data)
+				{
+					console.log('start:', data.start);
+					// console.log('h:', data.h);				
+					// sizePlayground(data.w, data.h)
+					// console.log(settings);
+					// clt_skt.send(JSON.stringify(settings))
+					startGame = data.start;
+					if (startGame === true )
+						{
+							intervalId = setInterval( () => 
+							{
+								const frame = JSON.stringify(play());
+								for (let clt_skt of clts)
+								{
+									if (clt_skt.readyState === clt_skt.OPEN)
+										clt_skt.send(frame);
+								};		
+							}, tpf);
+						}
+						else 
+							clearInterval(intervalId);
+				}	
             }
             catch (e) {
                 console.error('Invalid JSON from client');
@@ -106,15 +125,7 @@ fast.ready().then(() => {
         });                
 	});	
 	
-	setInterval( () => 
-	{
-		const frame = JSON.stringify(play());
-		for (let clt_skt of clts)
-		{
-			if (clt_skt.readyState === clt_skt.OPEN)
-				clt_skt.send(frame);
-		};		
-	}, fps);
+	
 
     server.listen(3000, () => {
         console.log("Server listening");
@@ -160,9 +171,17 @@ function play()
 {	
     // check
 	if (x + ballRadius >= canvasWidth)
+	{
 		lost2 = true;
+		s1++;
+		gameState.score.p1 = s1;
+	}
 	else if (x - ballRadius <= 0)
+	{
 		lost1 = true;
+		s2++;
+		gameState.score.p2 = s2;
+	}	
 	else if (y + ballRadius >= canvasHeight || y - ballRadius <= 0)	
 		signY = -signY;		
 	else if (distBallPad2(x, y) <= 0) 
@@ -202,7 +221,7 @@ function play()
 	}
     //
     gameState.ball.x  = x / canvasWidth;
-	gameState.ball.y  = y / canvasHeight;
+	gameState.ball.y  = y / canvasHeight;	
 	// console.log(gameState);
 	return (gameState);    
 	//requestAnimationFrame(draw);
