@@ -190,7 +190,7 @@ function keyDownHandler(e)
   else if (e.key === "x") {
     downPressed1 = true;	
   }
-  else if (e.key === "p") {
+  else if (e.key === " ") {
 	if (startGame.start === true)
 		startGame.start = false;			
 	else 	

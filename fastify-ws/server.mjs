@@ -6,7 +6,7 @@ let canvasHeight = 320;
 let canvasWidth = 480;
 let ballRadius = canvasHeight / 40;
 let paddleHeight = canvasHeight / 5;
-let paddleWidth = 3 * canvasHeight / 80 // 3 * ballRadius / 2;
+let paddleWidth = 3 * canvasHeight / 80; // 3 * ballRadius / 2;
 const ballSpeed = 3;
 const padSpeed = 6;
 const tpf = 10; // frequence for setInterval
@@ -20,6 +20,7 @@ let paddle1Y = (canvasHeight - paddleHeight) / 2;
 let paddle2Y = (canvasHeight - paddleHeight) / 2;
 let padTouch1 = false;
 let padTouch2 = false;
+let corner = false;
 let x = canvasWidth / 2;
 let y = canvasHeight / 2;
 let s1 = 0;
@@ -36,6 +37,7 @@ let settings = {
 }
 let intervalId = null;
 let startGame = false;
+
 
 
 /***************************************************************************************/
@@ -97,40 +99,55 @@ fast.ready().then(() => {
 				}
 				else if ('start' in data)
 				{
-					console.log('start:', data.start);
-					// console.log('h:', data.h);				
-					// sizePlayground(data.w, data.h)
-					// console.log(settings);
-					// clt_skt.send(JSON.stringify(settings))
+					console.log('start:', data.start);															
 					startGame = data.start;
+					// framing(startGame, clts)
 					if (startGame === true )
+					{
+						intervalId = setInterval( () => 
 						{
-							intervalId = setInterval( () => 
+							const frame = JSON.stringify(play());
+							for (let clt_skt of clts)
 							{
-								const frame = JSON.stringify(play());
-								for (let clt_skt of clts)
-								{
-									if (clt_skt.readyState === clt_skt.OPEN)
-										clt_skt.send(frame);
-								};		
-							}, tpf);
-						}
-						else 
-							clearInterval(intervalId);
+								if (clt_skt.readyState === clt_skt.OPEN)
+									clt_skt.send(frame);
+							};		
+						}, tpf);
+					}
+					else 
+						clearInterval(intervalId);
 				}	
             }
             catch (e) {
                 console.error('Invalid JSON from client');
             }
         });                
-	});	
-	
+	});		
 	
 
     server.listen(3000, () => {
         console.log("Server listening");
     });	
 });  
+
+// function framing(startGame, clts)
+// {	
+
+// 	if (startGame === true )
+// 	{
+// 		intervalId = setInterval( () => 
+// 		{
+// 			const frame = JSON.stringify(play());
+// 			for (let clt_skt of clts)
+// 			{
+// 				if (clt_skt.readyState === clt_skt.OPEN)
+// 					clt_skt.send(frame);
+// 			};		
+// 		}, tpf);
+// 	}
+// 	else 
+// 		clearInterval(intervalId);
+// }
 
 
 /***************************************************************************************/
@@ -189,6 +206,8 @@ function play()
 		if (padTouch2 === false)
 		{
 			signX = -signX;
+			if (corner === true)
+				signY = -signY;			
 			padTouch2 = true;			
 		}
 		if (distBallPad2(x + signX*dx, y + signY*dy) > 0)				
@@ -199,6 +218,8 @@ function play()
 		if (padTouch1 === false)
 		{
 			signX = -signX;
+			if (corner === true)
+				signY = -signY;
 			padTouch1 = true;						
 		}			
 		if (distBallPad1(x + signX*dx, y + signY*dy) > 0)		
@@ -256,11 +277,11 @@ function distBallPad2(xB, yB)
 	const yP = paddle2Y + paddleHeight;	
 
 	if (yB >= paddle2Y && yB <= yP)	
-		return (xP - (xB + ballRadius));	
+		return (corner = false, xP - (xB + ballRadius));	
 	if (yB > yP)
-		return (Math.sqrt((xB - xP) * (xB - xP) + (yB - yP) * (yB - yP)) - ballRadius);
+		return (corner = true, Math.sqrt((xB - xP) * (xB - xP) + (yB - yP) * (yB - yP)) - ballRadius);
 	if (yB < paddle2Y)
-		return (Math.sqrt((xB - xP) * (xB - xP) + (yB - paddle2Y) * (yB - paddle2Y)) - ballRadius);		
+		return (corner = true, Math.sqrt((xB - xP) * (xB - xP) + (yB - paddle2Y) * (yB - paddle2Y)) - ballRadius);		
 }
 
 function distBallPad1(xB, yB)
@@ -269,9 +290,9 @@ function distBallPad1(xB, yB)
 	const yP = paddle1Y + paddleHeight;	
 
 	if (yB >= paddle1Y && yB <= yP)		
-		return ((xB - ballRadius) - xP);	
+		return (corner = false, (xB - ballRadius) - xP);	
 	if (yB > yP)
-		return (Math.sqrt((xB - xP) * (xB - xP) + (yB - yP) * (yB - yP)) - ballRadius);
+		return (corner = true, Math.sqrt((xB - xP) * (xB - xP) + (yB - yP) * (yB - yP)) - ballRadius);
 	if (yB < paddle1Y)
-		return (Math.sqrt((xB - xP) * (xB - xP) + (yB - paddle1Y) * (yB - paddle1Y)) - ballRadius);		
+		return (corner = true,Math.sqrt((xB - xP) * (xB - xP) + (yB - paddle1Y) * (yB - paddle1Y)) - ballRadius);		
 }
