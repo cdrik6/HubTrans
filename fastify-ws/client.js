@@ -8,10 +8,9 @@ let upPressed1 = false;
 let downPressed1 = false;
 let upPressed2 = false;
 let downPressed2 = false;
-let paddle = {p1:"", p2:""};
-let startGame = {start:false};
-
-//  let canvasSize = {w:canvas.width, h:canvas.height};
+let paddle = {p1: "", p2: ""};
+let startGame = {start: false};
+let mode = {nb_players: 2};
 
 /**************************** ws  *****************************/
 const output = document.getElementById('output');
@@ -27,6 +26,7 @@ clt_wskt.addEventListener('error', err => {
 
 clt_wskt.addEventListener('open', () => {
 	output.textContent += 'Connected to WebSocket\n';
+	clt_wskt.send(JSON.stringify(mode));
 	// clt_wskt.send(JSON.stringify(paddle));
 	// clt_wskt.send(JSON.stringify(canvasSize));
 });
@@ -58,47 +58,6 @@ clt_wskt.addEventListener('message', event => {
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-
-// document.addEventListener("keydown", (event) => {
-// 	downHandler(event);
-// 	clt_wskt.send(JSON.stringify(paddle));	
-// }, false);
-
-// document.addEventListener("keyup", (event) => {
-// 	upHandler(event);
-// 	//clt_wskt.send(JSON.stringify(paddle));	
-// }, false);
-
-
-// function downHandler(e) {
-//   if (e.key == "Up" || e.key == "ArrowUp") {
-//     paddle.p2 = "up";
-//   }
-//   else if (e.key == "Down" || e.key == "ArrowDown") {
-//     paddle.p2 = "down";
-//   }
-//   else if (e.key == "w") {
-//     paddle.p1 = "up";
-//   }
-//   else if (e.key == "x") {
-//     paddle.p1 = "down";
-//   }  
-// }
-
-// function upHandler(e) {
-//   if (e.key == "Up" || e.key == "ArrowUp") {
-//     paddle.p2 = "";
-//   }
-//   else if (e.key == "Down" || e.key == "ArrowDown") {
-//     paddle.p2 = "";
-//   }
-//   else if (e.key == "w") {
-//     paddle.p1 = "";
-//   }
-//   else if (e.key == "x") {
-//     paddle.p1 = "";
-//   }
-// }
 
 function padMovement()
 {
@@ -152,77 +111,40 @@ function padMovement()
 	}
 }
 
-// function padMovement()
-// {
-// 	if (upPressed2 === true)
-//   	{  	  
-//       	paddle.p2 = "up";
-// 	  	clt_wskt.send(JSON.stringify(paddle));
-// 	}
-// 	if (downPressed2 === true)
-//   	{  	  	
-//     	paddle.p2 = "down";
-// 		clt_wskt.send(JSON.stringify(paddle));
-// 	}
-// 	if (upPressed1 === true)
-//   	{ 		
-//     	paddle.p1 = "up";
-// 		clt_wskt.send(JSON.stringify(paddle));
-// 	}
-// 	if (downPressed1 === true)
-//   	{		
-//       	paddle.p1 = "down";
-// 		clt_wskt.send(JSON.stringify(paddle));
-// 	}	
-// }
-
 function keyDownHandler(e)
 {
-  if (e.key === "Up" || e.key === "ArrowUp") {
-    upPressed2 = true;    
-  }
-  else if (e.key === "Down" || e.key === "ArrowDown") {
-    downPressed2 = true;	
-  }
-  else if (e.key === "w") {
-    upPressed1 = true;	
-  }
-  else if (e.key === "x") {
-    downPressed1 = true;	
-  }
-  else if (e.key === " ") {
-	if (startGame.start === true)
-		startGame.start = false;			
-	else 	
-		startGame.start = true;		
-	clt_wskt.send(JSON.stringify(startGame));	
-  }
+	if (e.key === "Up" || e.key === "ArrowUp")
+		upPressed2 = true;
+	else if (e.key === "Down" || e.key === "ArrowDown")
+		downPressed2 = true;  
+	else if (e.key === "w")
+		upPressed1 = true;  
+	else if (e.key === "x")
+		downPressed1 = true;  
+	else if (e.key === " ")
+	{
+		if (startGame.start === true)
+			startGame.start = false;			
+		else 	
+			startGame.start = true;		
+		clt_wskt.send(JSON.stringify(startGame));	
+	}
 }
 
 function keyUpHandler(e)
 {
-  if (e.key === "Up" || e.key === "ArrowUp") {
-    upPressed2 = false;
-  }
-  else if (e.key === "Down" || e.key === "ArrowDown") {
-    downPressed2 = false;
-  }
-  else if (e.key === "w") {
-    upPressed1 = false;	
-  }
-  else if (e.key === "x") {
-    downPressed1 = false;	
-  }
+	if (e.key === "Up" || e.key === "ArrowUp") 	
+		upPressed2 = false;  
+	else if (e.key === "Down" || e.key === "ArrowDown")
+		downPressed2 = false;  
+	else if (e.key === "w")
+		upPressed1 = false;	  
+	else if (e.key === "x")
+		downPressed1 = false;  
 }
 
-/* Note: Event name
-"open" = When the connection is established
-"message" = When a message is received
-"error" = When there's an error
-"close" = When the connection closes
-*/
-
-function drawBall(x, y) {	
+function drawBall(x, y)
+{	
 	ctx.beginPath();		
 	ctx.arc(x , y, ballRadius, 0, Math.PI * 2);
 	ctx.fillStyle = "rgba(255, 0, 0, 1)";
@@ -230,16 +152,18 @@ function drawBall(x, y) {
 	ctx.closePath();		
 }
 
-function drawPaddles(paddle1Y, paddle2Y) {
-  ctx.beginPath();
-  ctx.rect(0, paddle1Y, paddleWidth, paddleHeight);
-  ctx.rect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);
-  ctx.fillStyle = "#0095DD";
-  ctx.fill();
-  ctx.closePath();
+function drawPaddles(paddle1Y, paddle2Y)
+{
+	ctx.beginPath();
+	ctx.rect(0, paddle1Y, paddleWidth, paddleHeight);
+	ctx.rect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);
+	ctx.fillStyle = "#0095DD";
+	ctx.fill();
+	ctx.closePath();
 }
 
-function printScore(s1, s2) {
+function printScore(s1, s2)
+{
 	const text = " - "
 	ctx.font = "30px sans serif";
 	ctx.fillStyle = "rgba(0, 100, 0, 1)";
@@ -249,21 +173,18 @@ function printScore(s1, s2) {
 	ctx.fillText(s2, pos + ctx.measureText(text).width, 40);
 }
 
-function draw(x,y, p1Y, p2Y, s1, s2) {
+function draw(x,y, p1Y, p2Y, s1, s2)
+{
 	ctx.clearRect(0, 0, canvas.width, canvas.height);	
 	printScore(s1,s2);	
 	drawBall(x * canvas.width,y * canvas.height);	
 	drawPaddles(p1Y * canvas.height, p2Y * canvas.height);
-	padMovement();	
-	//requestAnimationFrame(draw);
+	padMovement();		
 }
-// setInterval(draw, 50);
-// draw();
 
-// function draw(x,y, p1Y, p2Y) {
-// 	ctx.clearRect(0, 0, canvas.width, canvas.height);	  		
-// 	drawBall(x,y);
-// 	drawPaddles(p1Y, p2Y);
-// 	padMovement();	
-// 	//requestAnimationFrame(draw);
-// }
+/* Note: Event name
+"open" = When the connection is established
+"message" = When a message is received
+"error" = When there's an error
+"close" = When the connection closes
+*/

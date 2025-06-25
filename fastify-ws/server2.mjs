@@ -1,22 +1,15 @@
+import { Game } from './Game.js'
+const games = {}; // --> map
+let id = 0;
 
 /***************************************************************************************/
 /*************************** Server Fastify ********************************************/
 /***************************************************************************************/
 
-// const fastify = require('fastify')();
 import fastify from 'fastify';
 const fast = fastify();
-// const ws = require('ws');
-// const WebSocketServer = ws.WebSocketServer;
-// const { WebSocketServer } = require('ws'); // just the WebSocketServer part of the ws module
 import { WebSocketServer } from 'ws';
-// const http = require('http');
 import http from 'http';
-
-let gameClass = require(game.mjs);
-let game = gameClass();
-console.log(game.);
-
 
 // http route
 fast.get('/hello', async (request, reply) => {
@@ -25,8 +18,6 @@ fast.get('/hello', async (request, reply) => {
     }
 );
 
-// http server from Fastify who will manage http requests so far
-// const server = http.createServer(fastify); // --> not good, only for express
 fast.ready().then(() => {
   
     const server = http.createServer((req, res) => {
@@ -35,18 +26,33 @@ fast.ready().then(() => {
     
     // bind websocketserver to the http server
     const srv_wskt = new WebSocketServer({ server , path: '/pong' });
-    let clts = new Set();
+    //let clts = new Set();
 
-    srv_wskt.on('connection', (clt_skt, res) => {        
-        console.log('Server: Client connected');
-		clt_skt.send(JSON.stringify(settings))
-		console.log(settings);
-		if (clts.size < 2) // 2 players max --> check multiplayer version
-			clts.add(clt_skt);
+    srv_wskt.on('connection', (clt_skt, res) => {
+		
+		console.log('Server: Client connected');
+
+		// if (id > 0 && games[id].status == 0)
+		// {
+
+		// }
+		// else
+		// {
+			const game = new Game(id, clt_skt, clt_skt);
+			games[id] = game; 
+			id++;
+
+		// } 	
+
+		clt_skt.send(JSON.stringify(game.settings))
+		console.log(game.settings);
+
+		// if (clts.size < 2) // 2 players max --> check multiplayer version
+		// 	clts.add(clt_skt);
 		//
 		clt_skt.on('close', () => {
             console.log('Server: Client disconnected');
-			clts.delete(clt_skt);
+			// clts.delete(clt_skt);
         });
 		//
 		clt_skt.on('message', clt_msg => {           
@@ -59,28 +65,33 @@ fast.ready().then(() => {
 				{
 					console.log('pad1:', data.p1);
 					console.log('pad2:', data.p2);				
-					paddlesY(data.p1, data.p2);
+					game.paddlesY(data.p1, data.p2);
 				}
 				else if ('start' in data)
 				{
 					console.log('start:', data.start);															
-					startGame = data.start;
-					// framing(startGame, clts)
-					if (startGame === true )
-					{
-						intervalId = setInterval( () => 
-						{
-							const frame = JSON.stringify(play());
-							for (let clt_skt of clts)
-							{
-								if (clt_skt.readyState === clt_skt.OPEN)
-									clt_skt.send(frame);
-							};		
-						}, tpf);
-					}
-					else 
-						clearInterval(intervalId);
-				}	
+					game.startGame = data.start;
+					game.start();
+					// // framing(startGame, clts)
+					// if (startGame === true )
+					// {
+					// 	intervalId = setInterval( () => 
+					// 	{
+					// 		const frame = JSON.stringify(play());
+					// 		for (let clt_skt of clts)
+					// 		{
+					// 			if (clt_skt.readyState === clt_skt.OPEN)
+					// 				clt_skt.send(frame);
+					// 		};		
+					// 	}, fq);
+					// }
+					// else 
+					// 	clearInterval(intervalId);
+				}				
+				else if ('nb_players' in data)
+				{
+					console.log('nb_players:', data.nb_players);
+				}
             }
             catch (e) {
                 console.error('Invalid JSON from client');
