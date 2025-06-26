@@ -1,5 +1,6 @@
 import { Game } from './Game.js'
-const games = {}; // --> map
+const gamesById = new Map();
+// const gamesByClient = new Map();
 let id = 0;
 
 /***************************************************************************************/
@@ -26,81 +27,162 @@ fast.ready().then(() => {
     
     // bind websocketserver to the http server
     const srv_wskt = new WebSocketServer({ server , path: '/pong' });
-    //let clts = new Set();
+    
 
     srv_wskt.on('connection', (clt_skt, res) => {
 		
-		console.log('Server: Client connected');
-
-		// if (id > 0 && games[id].status == 0)
-		// {
-
-		// }
-		// else
-		// {
-			const game = new Game(id, clt_skt, clt_skt);
-			games[id] = game; 
-			id++;
-
-		// } 	
-
-		clt_skt.send(JSON.stringify(game.settings))
-		console.log(game.settings);
-
-		// if (clts.size < 2) // 2 players max --> check multiplayer version
-		// 	clts.add(clt_skt);
-		//
-		clt_skt.on('close', () => {
-            console.log('Server: Client disconnected');
-			// clts.delete(clt_skt);
-        });
-		//
+		clt_skt.on('open', () => {
+			console.log('Server: Client connected');		
+		});		
+		
 		clt_skt.on('message', clt_msg => {           
-            console.log('Server received:', clt_msg.toString());
-            // paddles from client			
+            console.log('Server received:', clt_msg.toString());            
 			const data = JSON.parse(clt_msg);
             try
-			{                
-				if ('p1' in data && 'p2' in data)
+			{					
+				if ('nb_players' in data)
 				{
-					console.log('pad1:', data.p1);
-					console.log('pad2:', data.p2);				
-					game.paddlesY(data.p1, data.p2);
+					console.log('nb_players:', data.nb_players);
+					if (data.nb_players === 2)
+					{
+						const game = new Game(id);
+						gamesById.set(id, game);
+						// gamesByClient.set(clt_skt, game);
+						id++;
+						game.players[0] = clt_skt;
+						game.players[1] = clt_skt;
+						game.ready = 1;
+						game.mode = 2;
+						clt_skt.send(JSON.stringify(game.settings))
+						console.log(game.settings);
+					}
+					else if	(data.nb_players === 1)
+					{
+						let newGame = true;
+						if (id > 0)
+						{
+							for (const game of gamesById.values())
+							{								
+								if (game.ready === 0 && game.mode === 1)
+								{
+									game.players[1] = clt_skt;
+									game.ready = 1;
+									// gamesByClient.set(clt_skt, game);
+									newGame = false;
+									clt_skt.send(JSON.stringify(game.settings))
+									console.log(game.settings);
+								}	
+							}
+						}
+						else if (newGame === true)
+						{
+							const game = new Game(id);
+							gamesById.set(id, game);
+							// gamesByClient.set(clt_skt, game);							
+							game.players[0] = clt_skt;
+							game.ready = 0;
+							game.mode = 1;
+							id++;
+							clt_skt.send(JSON.stringify(game.settings))
+							console.log(game.settings);
+						}
+					}					
+				}
+				else if ('p1' in data && 'p2' in data)
+				{
+					// const game = gamesByClient.get(clt_skt);
+					const game = getGame(clt_skt);
+					if (game)
+					{
+						if (game.mode === 2)
+						{
+							console.log('pad1:', data.p1);
+							console.log('pad2:', data.p2);				
+							game.paddlesY(data.p1, data.p2);
+						}
+						else 
+						{
+							if (game.players[0] === clt_skt)							
+								game.paddlesY(data.p1, "");								
+							else if (game.players[1] === clt_skt)							
+								game.paddlesY("", data.p2);							
+						}
+					}
 				}
 				else if ('start' in data)
 				{
-					console.log('start:', data.start);															
-					game.startGame = data.start;
-					game.start();
-					// // framing(startGame, clts)
-					// if (startGame === true )
-					// {
-					// 	intervalId = setInterval( () => 
-					// 	{
-					// 		const frame = JSON.stringify(play());
-					// 		for (let clt_skt of clts)
-					// 		{
-					// 			if (clt_skt.readyState === clt_skt.OPEN)
-					// 				clt_skt.send(frame);
-					// 		};		
-					// 	}, fq);
-					// }
-					// else 
-					// 	clearInterval(intervalId);
+					// const game = gamesByClient.get(clt_skt);
+					const game = getGame(clt_skt);					
+					if (game)
+					{
+						if (game.startGame === true)
+							game.start(false);
+						else 
+							game.start(true);
+						
+						// // client version
+						// if (game.players[0] === clt_skt)
+						// 	console.log(game.id + ': P1 start: ' + data.start);
+						// else if (game.players[1] === clt_skt)
+						// 	console.log(game.id + ': P2 start: ' + data.start);
+						// // game.startGame = data.start;
+						// game.start(data.start);
+
+						//
+						// // framing(startGame, clts)
+						// if (startGame === true )
+						// {
+						// 	intervalId = setInterval( () => 
+						// 	{
+						// 		const frame = JSON.stringify(play());
+						// 		for (let clt_skt of clts)
+						// 		{
+						// 			if (clt_skt.readyState === clt_skt.OPEN)
+						// 				clt_skt.send(frame);
+						// 		};		
+						// 	}, fq);
+						// }
+						// else 
+						// 	clearInterval(intervalId);
+					}	
 				}				
-				else if ('nb_players' in data)
-				{
-					console.log('nb_players:', data.nb_players);
-				}
             }
             catch (e) {
                 console.error('Invalid JSON from client');
             }
         });                
-	});		
+
+		clt_skt.on('close', () => {
+			// const game = gamesByClient.get(clt_skt);		
+			const game = getGame(clt_skt);
+			if (game)
+			{
+				console.log('Server: Client disconnected');
+				if (game.players[0] && game.players[0].readyState === game.players[0].OPEN)
+					game.players[0].send(JSON.stringify({dis:"other client disconnected"}));
+				// gamesByClient.delete(game.players[0]);					
+				if (game.players[1] && game.players[1].readyState === game.players[1].OPEN)
+						game.players[1].send(JSON.stringify({dis:"other client disconnected"}));
+				// gamesByClient.delete(game.players[1]);
+				gamesById.delete(game.id);
+			}			
+		});
+
+	});
 	
 
     server.listen(3000, () => {
         console.log("Server listening");
     });	
 });  
+
+// id <-> game <-> clt_skt
+function getGame(clt_skt)
+{
+	for (const game of gamesById.values())
+	{
+		if (game.players[0] === clt_skt || game.players[1] === clt_skt)
+			return (game);
+	}
+	return (null);
+}

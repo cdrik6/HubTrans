@@ -1,9 +1,9 @@
 export class Game {
 
-	constructor(id, p1_skt, p2_skt)
+	constructor(id)
 	{
 		this.id = id;
-		this.players = [p1_skt, p2_skt];
+		this.players = [null, null];
 		this.canvasHeight = 320;
 		this.canvasWidth = 480;
 		this.ballRadius = this.canvasHeight / 40;
@@ -39,7 +39,8 @@ export class Game {
 		};
 		this.intervalId = null;
 		this.startGame = false;
-		this.status = 0;				
+		this.ready = 0;
+		this.mode = 1;
 	}
 
 	// get paddles movements from client
@@ -149,9 +150,10 @@ export class Game {
 	}
 
 
-	start()
+	start(startGame)
 	{
-		if (this.startGame === true )
+		this.startGame = startGame;
+		if (this.startGame === true && this.ready === 1)
 		{
 			this.intervalId = setInterval( () => 
 			{
@@ -167,6 +169,7 @@ export class Game {
 			clearInterval(this.intervalId);
 	}		
 }
+
 
 /***************************************************************************************/
 /*************************** Tools *****************************************************/

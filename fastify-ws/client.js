@@ -9,20 +9,12 @@ let downPressed1 = false;
 let upPressed2 = false;
 let downPressed2 = false;
 let paddle = {p1: "", p2: ""};
-let startGame = {start: false};
-let mode = {nb_players: 2};
+let startGame = {start: ""};
+let mode = {nb_players: 1};
 
 /**************************** ws  *****************************/
 const output = document.getElementById('output');
 const clt_wskt = new WebSocket('ws://localhost:3000/pong');
-
-clt_wskt.addEventListener('close', () => {
-	output.textContent += 'WebSocket closed\n';
-});
-
-clt_wskt.addEventListener('error', err => {
-	output.textContent += 'Error: ' + err + '\n';
-});
 
 clt_wskt.addEventListener('open', () => {
 	output.textContent += 'Connected to WebSocket\n';
@@ -31,17 +23,25 @@ clt_wskt.addEventListener('open', () => {
 	// clt_wskt.send(JSON.stringify(canvasSize));
 });
 
-clt_wskt.addEventListener('message', event => {
+clt_wskt.addEventListener('error', err => {
+	output.textContent += 'Error: ' + err + '\n';
+});
+
+clt_wskt.addEventListener('close', () => {
+	output.textContent += 'WebSocket closed\n';
+});
+
+clt_wskt.addEventListener('message', srv_msg => {
 	try
 	{
-		const data = JSON.parse(event.data);
+		const data = JSON.parse(srv_msg.data);
 		console.log(data);		
 		// console.log('Ball position:', data.ball.x, data.ball.y);
 		// console.log('Pad position:', data.paddle.p1, data.paddle.p2);		
 		// console.log('Score P2:', data.score.p2);		
 		if ('ball' in data && 'paddle' in data  && 'x' in data.ball && 'y' in data.ball && 'p1' in data.paddle && 'p2' in data.paddle)
 			draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2, data.score.p1, data.score.p2);
-		if ('bR' in data && 'pH' in data && 'pW' in data)
+		else if ('bR' in data && 'pH' in data && 'pW' in data)
 		{				
 			ballRadius = data.bR * canvas.height;
 			paddleHeight = data.pH * canvas.height;
@@ -49,10 +49,14 @@ clt_wskt.addEventListener('message', event => {
 			output.textContent += ballRadius + '\n';
 			output.textContent += paddleHeight + '\n';
 			output.textContent += paddleWidth + '\n';
-		}	
+		}
+		else if ('dis' in data)
+		{
+			output.textContent += data.dis +'\n';
+		}
 	}
 	catch (e) {
-		console.error('Invalid JSON received:', event.data);
+		console.error('Invalid JSON received:', srv_msg.data);
 	}		
 });
 
@@ -117,16 +121,16 @@ function keyDownHandler(e)
 		upPressed2 = true;
 	else if (e.key === "Down" || e.key === "ArrowDown")
 		downPressed2 = true;  
-	else if (e.key === "w")
+	else if (e.key === "q")
 		upPressed1 = true;  
-	else if (e.key === "x")
+	else if (e.key === "z")
 		downPressed1 = true;  
 	else if (e.key === " ")
 	{
-		if (startGame.start === true)
-			startGame.start = false;			
-		else 	
-			startGame.start = true;		
+		// if (startGame.start === true)
+		// 	startGame.start = false;			
+		// else 	
+		// 	startGame.start = true;		
 		clt_wskt.send(JSON.stringify(startGame));	
 	}
 }
@@ -137,9 +141,9 @@ function keyUpHandler(e)
 		upPressed2 = false;  
 	else if (e.key === "Down" || e.key === "ArrowDown")
 		downPressed2 = false;  
-	else if (e.key === "w")
+	else if (e.key === "q")
 		upPressed1 = false;	  
-	else if (e.key === "x")
+	else if (e.key === "z")
 		downPressed1 = false;  
 }
 
@@ -149,7 +153,8 @@ function drawBall(x, y)
 	ctx.arc(x , y, ballRadius, 0, Math.PI * 2);
 	ctx.fillStyle = "rgba(255, 0, 0, 1)";
 	ctx.fill();	
-	ctx.closePath();		
+	ctx.closePath();
+	console.log("x = " + x + " y = " + y);
 }
 
 function drawPaddles(paddle1Y, paddle2Y)
@@ -160,6 +165,7 @@ function drawPaddles(paddle1Y, paddle2Y)
 	ctx.fillStyle = "#0095DD";
 	ctx.fill();
 	ctx.closePath();
+	console.log("P1 = " + paddle1Y + " " + paddle1Y + paddleHeight + " P2 = " + paddle2Y + " " + paddle2Y + paddleHeight );
 }
 
 function printScore(s1, s2)
