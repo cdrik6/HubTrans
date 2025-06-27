@@ -40,15 +40,16 @@ fast.ready().then(() => {
 			const data = JSON.parse(clt_msg);
             try
 			{					
-				if ('nb_players' in data)
+				if ('nbPlayers' in data)
 				{
-					console.log('nb_players:', data.nb_players);
-					if (data.nb_players === 2)
+					console.log('nbPlayers:', data.nbPlayers);
+					if (data.nbPlayers === 2)
 					{
 						const game = new Game(id);
 						gamesById.set(id, game);
 						// gamesByClient.set(clt_skt, game);
-						id++;
+						console.log('Server: New game with 2 players: ' + id );
+						id++;						
 						game.players[0] = clt_skt;
 						game.players[1] = clt_skt;
 						game.ready = 1;
@@ -56,29 +57,32 @@ fast.ready().then(() => {
 						clt_skt.send(JSON.stringify(game.settings))
 						console.log(game.settings);
 					}
-					else if	(data.nb_players === 1)
-					{
+					else if	(data.nbPlayers === 1)
+					{						
 						let newGame = true;
-						if (id > 0)
-						{
+						if (id > 0) // at least one game created
+						{							
 							for (const game of gamesById.values())
 							{								
+								// console.log("mode ready " + game.mode + " " + game.ready);
 								if (game.ready === 0 && game.mode === 1)
 								{
 									game.players[1] = clt_skt;
 									game.ready = 1;
+									console.log('Server: game: ' + game.id + ' found 2nd player');
 									// gamesByClient.set(clt_skt, game);
 									newGame = false;
 									clt_skt.send(JSON.stringify(game.settings))
 									console.log(game.settings);
-								}	
+								}								
 							}
 						}
-						else if (newGame === true)
-						{
+						if (id === 0 || newGame === true)
+						{							
 							const game = new Game(id);
 							gamesById.set(id, game);
-							// gamesByClient.set(clt_skt, game);							
+							// gamesByClient.set(clt_skt, game);
+							console.log('Server: New game with 1 player: ' + id );		
 							game.players[0] = clt_skt;
 							game.ready = 0;
 							game.mode = 1;
@@ -94,6 +98,7 @@ fast.ready().then(() => {
 					const game = getGame(clt_skt);
 					if (game)
 					{
+						console.log('paddles: ' + game.id);
 						if (game.mode === 2)
 						{
 							console.log('pad1:', data.p1);
@@ -103,18 +108,21 @@ fast.ready().then(() => {
 						else 
 						{
 							if (game.players[0] === clt_skt)							
-								game.paddlesY(data.p1, "");								
-							else if (game.players[1] === clt_skt)							
-								game.paddlesY("", data.p2);							
+								game.paddlesY(data.p1, data.p2);
+								// game.paddlesY(data.p1, "");								
+							else if (game.players[1] === clt_skt)	
+								game.paddlesY(data.p1, data.p2);						
+								// game.paddlesY("", data.p2);							
 						}
 					}
 				}
 				else if ('start' in data)
 				{
 					// const game = gamesByClient.get(clt_skt);
-					const game = getGame(clt_skt);					
+					const game = getGame(clt_skt);
+					console.log("game id start/pause: " + game.id);					
 					if (game)
-					{
+					{						
 						if (game.startGame === true)
 							game.start(false);
 						else 
@@ -147,7 +155,8 @@ fast.ready().then(() => {
 					}	
 				}				
             }
-            catch (e) {
+            catch (e)
+			{
                 console.error('Invalid JSON from client');
             }
         });                
@@ -163,8 +172,10 @@ fast.ready().then(() => {
 				// gamesByClient.delete(game.players[0]);					
 				if (game.players[1] && game.players[1].readyState === game.players[1].OPEN)
 						game.players[1].send(JSON.stringify({dis:"other client disconnected"}));
-				// gamesByClient.delete(game.players[1]);
+				// gamesByClient.delete(game.players[1]);				
+				game.end();
 				gamesById.delete(game.id);
+				console.log("id deleted: " + game.id);
 			}			
 		});
 

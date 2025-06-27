@@ -10,7 +10,7 @@ let upPressed2 = false;
 let downPressed2 = false;
 let paddle = {p1: "", p2: ""};
 let startGame = {start: ""};
-let mode = {nb_players: 1};
+let mode = {nbPlayers: 1}; // --> to be catched before ************
 
 /**************************** ws  *****************************/
 const output = document.getElementById('output');
@@ -35,7 +35,7 @@ clt_wskt.addEventListener('message', srv_msg => {
 	try
 	{
 		const data = JSON.parse(srv_msg.data);
-		console.log(data);		
+		// console.log(data);		
 		// console.log('Ball position:', data.ball.x, data.ball.y);
 		// console.log('Pad position:', data.paddle.p1, data.paddle.p2);		
 		// console.log('Score P2:', data.score.p2);		
@@ -165,7 +165,7 @@ function drawPaddles(paddle1Y, paddle2Y)
 	ctx.fillStyle = "#0095DD";
 	ctx.fill();
 	ctx.closePath();
-	console.log("P1 = " + paddle1Y + " " + paddle1Y + paddleHeight + " P2 = " + paddle2Y + " " + paddle2Y + paddleHeight );
+	console.log("P1 = " + paddle1Y + " " + (paddle1Y + paddleHeight) + " P2 = " + paddle2Y + " " + (paddle2Y + paddleHeight) );
 }
 
 function printScore(s1, s2)

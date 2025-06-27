@@ -11,7 +11,7 @@ export class Game {
 		this.paddleWidth = 3 * this.canvasHeight / 80;
 		this.ballSpeed = 3;
 		this.padSpeed = 3;
-		this.fq = 15;
+		this.fq = 10;
 		this.dx = this.ballSpeed;
 		this.dy = this.ballSpeed;
 		this.signX = getRandomSign();
@@ -57,10 +57,9 @@ export class Game {
 		this.gameState.paddle.p2 = this.paddle2Y / this.canvasHeight;
 		this.gameState.paddle.p1 = this.paddle1Y / this.canvasHeight;
 	}
-
-	// playing pong
+		
 	play()
-	{	
+	{
 		// check
 		if (this.x + this.ballRadius >= this.canvasWidth)
 		{
@@ -78,6 +77,8 @@ export class Game {
 			this.signY = -this.signY;		
 		else if (this.distBallPad2(this.x, this.y) <= 0) 
 		{
+			console.log("distBallPad2(" + this.id + ") <= 0, padTouch2 = " + this.padTouch2);
+
 			if (this.padTouch2 === false)
 			{
 				this.signX = -this.signX;
@@ -90,6 +91,7 @@ export class Game {
 		}		
 		else if (this.distBallPad1(this.x, this.y) <= 0)
 		{
+			console.log("distBallPad1(" + this.id + ") <= 0, padTouch1 = " + this.padTouch1);
 			if (this.padTouch1 === false)
 			{
 				this.signX = -this.signX;
@@ -100,7 +102,7 @@ export class Game {
 			if (this.distBallPad1(this.x + this.signX*this.dx, this.y + this.signY*this.dy) > 0)		
 				this.padTouch1 = false;				
 		}
-
+	
 		// next
 		if (!this.lost1 && !this.lost2)
 		{
@@ -122,6 +124,19 @@ export class Game {
 		// console.log(gameState);
 		return (this.gameState);    		
 	}
+
+	// // playing pong
+	// play()
+	// {
+	// 	// this.check_ball();
+	// 	// this.next_ball();
+	// 	try {
+    //  	this.check_ball();
+    //     	this.next_ball();
+    // 	} catch (e) {
+    //     	console.error("Game play error:", e);
+    // 	}
+	// }
 
 	distBallPad2(xB, yB)
 	{
@@ -162,12 +177,23 @@ export class Game {
 				{
 					if (clt_skt.readyState === clt_skt.OPEN)
 						clt_skt.send(frame);
-				};		
+				}		
 			}, this.fq);
 		}
 		else 
 			clearInterval(this.intervalId);
-	}		
+	}
+	
+	end()
+	{
+    	if (this.intervalId)
+		{
+        	clearInterval(this.intervalId);
+        	this.intervalId = null;
+    	}
+		this.players = [];
+    	console.log(this.id + " is ended");
+	}
 }
 
 
