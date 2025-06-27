@@ -61,6 +61,8 @@ export class Game {
 	play()
 	{
 		// check
+		const d1 = this.distBallPad1(this.x, this.y);
+		const d2 = this.distBallPad2(this.x, this.y);
 		if (this.x + this.ballRadius >= this.canvasWidth)
 		{
 			this.lost2 = true;
@@ -75,32 +77,59 @@ export class Game {
 		}	
 		else if (this.y + this.ballRadius >= this.canvasHeight || this.y - this.ballRadius <= 0)	
 			this.signY = -this.signY;		
-		else if (this.distBallPad2(this.x, this.y) <= 0) 
+		// else if (this.distBallPad2(this.x, this.y) <= 0) 
+		else if (d2 <= 0) 
 		{
-			console.log("distBallPad2(" + this.id + ") <= 0, padTouch2 = " + this.padTouch2);
+			console.log("distBallPad2(" + this.id + ") <= 0, padTouch2 = " + this.padTouch2 + " " + d2);
+			console.log("x = " + this.x + " y = " + this.y);
+			console.log("dx = " + this.dx + " dy = " + this.dy);
+			console.log("signX = " + this.signX + " signY = " + this.signY);
 
-			if (this.padTouch2 === false)
-			{
-				this.signX = -this.signX;
-				if (this.corner === true)
-					this.signY = -this.signY;			
-				this.padTouch2 = true;			
-			}
-			if (this.distBallPad2(this.x + this.signX*this.dx, this.y + this.signY*this.dy) > 0)				
-				this.padTouch2 = false;								
+			// this.x = this.x + d2;
+			this.x = this.x  -  this.ballRadius;
+			this.signX = -this.signX;
+			if (this.corner === true)
+				this.signY = -this.signY;			
+
+			// // 1st 
+			// if (this.padTouch2 === false)
+			// {
+			// 	this.signX = -this.signX;
+			// 	if (this.corner === true)
+			// 		this.signY = -this.signY;			
+			// 	this.padTouch2 = true;
+			// 	console.log("la padTouch2 = " + this.padTouch2);
+			// }
+			// const d2next = this.distBallPad2(this.x + this.signX*this.dx, this.y + this.signY*this.dy)
+			// //if (this.distBallPad2(this.x + this.signX*this.dx, this.y + this.signY*this.dy) > 0)				
+			// if (d2next > 0)				
+			// {
+			// 	this.padTouch2 = false;								
+			// 	console.log("ici padTouch2 = " + this.padTouch2);
+			// 	console.log("d2next = " + d2next + " x = " + this.x + " y = " + this.y);
+			// 	console.log("dx = " + this.dx + " dy = " + this.dy);
+			// 	console.log("signX = " + this.signX + " signY = " + this.signY);
+			// }
 		}		
-		else if (this.distBallPad1(this.x, this.y) <= 0)
+		// else if (this.distBallPad1(this.x, this.y) <= 0)
+		else if (d1 <= 0)
 		{
-			console.log("distBallPad1(" + this.id + ") <= 0, padTouch1 = " + this.padTouch1);
-			if (this.padTouch1 === false)
-			{
-				this.signX = -this.signX;
-				if (this.corner === true)
-					this.signY = -this.signY;
-				this.padTouch1 = true;						
-			}			
-			if (this.distBallPad1(this.x + this.signX*this.dx, this.y + this.signY*this.dy) > 0)		
-				this.padTouch1 = false;				
+			console.log("distBallPad1(" + this.id + ") <= 0, padTouch1 = " + this.padTouch1 + " " + d1);
+			this.x = this.x  +  this.ballRadius;
+			this.signX = -this.signX;			
+			if (this.corner === true)
+				this.signY = -this.signY;			
+			
+			// // 1st
+			// if (this.padTouch1 === false)
+			// {
+			// 	this.signX = -this.signX;
+			// 	if (this.corner === true)
+			// 		this.signY = -this.signY;
+			// 	this.padTouch1 = true;						
+			// }			
+			// if (this.distBallPad1(this.x + this.signX*this.dx, this.y + this.signY*this.dy) > 0)		
+			// 	this.padTouch1 = false;				
 		}
 	
 		// next
