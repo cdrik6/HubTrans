@@ -10,7 +10,10 @@ let upPressed2 = false;
 let downPressed2 = false;
 let paddle = {p1: "", p2: ""};
 let startGame = {start: ""};
-let mode = {nbPlayers: 1}; // --> to be catched before ************
+let mode = {nbPlayers: 1, userId: 3}; // --> catched just below
+// Set mode
+const params = new URLSearchParams(window.location.search);
+mode = {nbPlayers: parseInt(params.get("mode"), 10), userId: parseInt(params.get("userId"), 10)};
 
 /**************************** ws  *****************************/
 const output = document.getElementById('output');
@@ -18,9 +21,7 @@ const clt_wskt = new WebSocket('ws://localhost:3000/pong');
 
 clt_wskt.addEventListener('open', () => {
 	output.textContent += 'Connected to WebSocket\n';
-	clt_wskt.send(JSON.stringify(mode));
-	// clt_wskt.send(JSON.stringify(paddle));
-	// clt_wskt.send(JSON.stringify(canvasSize));
+	clt_wskt.send(JSON.stringify(mode));	
 });
 
 clt_wskt.addEventListener('error', err => {
@@ -130,7 +131,8 @@ function keyDownHandler(e)
 		// if (startGame.start === true)
 		// 	startGame.start = false;			
 		// else 	
-		// 	startGame.start = true;		
+		// 	startGame.start = true;	
+		//console.log(JSON.stringify(startGame));			
 		clt_wskt.send(JSON.stringify(startGame));	
 	}
 }

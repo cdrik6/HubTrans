@@ -4,6 +4,7 @@ export class Game {
 	{
 		this.id = id;
 		this.players = [null, null];
+		this.users = [null, null];
 		this.canvasHeight = 320;
 		this.canvasWidth = 480;
 		this.ballRadius = this.canvasHeight / 40;
@@ -84,7 +85,7 @@ export class Game {
 				if (this.corner === true)
 					this.signY = -this.signY;			
 				this.padTouch2 = true;
-				console.log("la padTouch2 = " + this.padTouch2);
+				// console.log("la padTouch2 = " + this.padTouch2);
 			}			
 		}		
 		else if (this.distBallPad1(this.x, this.y) <= 0)		
@@ -121,6 +122,7 @@ export class Game {
 			this.signY = getRandomSign();
 			this.padTouch2 = false;
 			this.padTouch1 = false;
+			// this.start(false);
 		}	
 		this.gameState.ball.x = this.x / this.canvasWidth;
 		this.gameState.ball.y = this.y / this.canvasHeight;	
