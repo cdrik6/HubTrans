@@ -196,7 +196,8 @@ export class Game {
         	clearInterval(this.intervalId);
         	this.intervalId = null;
     	}
-		this.players = [];
+		this.players = [null, null];
+		this.users = [null, null];
     	console.log(this.id + " is ended");
 	}
 }

@@ -14,15 +14,17 @@ let mode = {nbPlayers: 1, userId: 3}; // --> catched just below
 // Set mode
 const params = new URLSearchParams(window.location.search);
 mode = {nbPlayers: parseInt(params.get("mode"), 10), userId: parseInt(params.get("userId"), 10)};
-
+// 
 const output = document.getElementById('output');
+output.textContent += 'Press space to start\n\n';
+
 
 /**************************** ws  *****************************/
 const clt_wskt = new WebSocket('ws://localhost:3000/pong');
 
-clt_wskt.addEventListener('open', () => {
-	output.textContent += 'Connected to WebSocket\n';
-	clt_wskt.send(JSON.stringify(mode));	
+clt_wskt.addEventListener('open', () => {	
+	output.textContent += 'Connected to WebSocket\n';		
+	clt_wskt.send(JSON.stringify(mode));
 });
 
 clt_wskt.addEventListener('error', err => {
@@ -48,13 +50,13 @@ clt_wskt.addEventListener('message', srv_msg => {
 			output.textContent += paddleHeight + '\n';
 			output.textContent += paddleWidth + '\n';
 		}
-		else if ('dis' in data)
-		{
-			output.textContent += data.dis +'\n';
-		}
+		// else if ('dis' in data)
+		// {
+		// 	output.textContent += data.dis +'\n';
+		// }
 	}
 	catch (e) {
-		console.error('Invalid JSON received:', srv_msg.data);
+		console.error('Invalid JSON received: ', srv_msg.data);
 	}		
 });
 
@@ -175,10 +177,19 @@ function draw(x,y, p1Y, p2Y, s1, s2)
 {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);	
 	printScore(s1,s2);	
-	drawBall(x * canvas.width,y * canvas.height);	
+	drawBall(x * canvas.width, y * canvas.height);	
 	drawPaddles(p1Y * canvas.height, p2Y * canvas.height);
 	padMovement();		
 }
+
+// function initDraw()
+// {
+// 	ctx.clearRect(0, 0, canvas.width, canvas.height);	
+// 	printScore(0,0);	
+// 	drawBall(canvas.width/2, canvas.height/2);	
+// 	drawPaddles(canvas.height/2 - paddleHeight/2, canvas.height/2 - paddleHeight/2);
+// 	padMovement();		
+// }
 
 /* Note: Event name
 "open" = When the connection is established
