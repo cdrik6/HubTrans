@@ -9,14 +9,15 @@ let downPressed1 = false;
 let upPressed2 = false;
 let downPressed2 = false;
 let paddle = {p1: "", p2: ""};
-let startGame = {start: ""};
+let start = {start: ""};
 let mode = {nbPlayers: 1, userId: 3}; // --> catched just below
 // Set mode
 const params = new URLSearchParams(window.location.search);
 mode = {nbPlayers: parseInt(params.get("mode"), 10), userId: parseInt(params.get("userId"), 10)};
 
-/**************************** ws  *****************************/
 const output = document.getElementById('output');
+
+/**************************** ws  *****************************/
 const clt_wskt = new WebSocket('ws://localhost:3000/pong');
 
 clt_wskt.addEventListener('open', () => {
@@ -35,11 +36,7 @@ clt_wskt.addEventListener('close', () => {
 clt_wskt.addEventListener('message', srv_msg => {
 	try
 	{
-		const data = JSON.parse(srv_msg.data);
-		// console.log(data);		
-		// console.log('Ball position:', data.ball.x, data.ball.y);
-		// console.log('Pad position:', data.paddle.p1, data.paddle.p2);		
-		// console.log('Score P2:', data.score.p2);		
+		const data = JSON.parse(srv_msg.data);		
 		if ('ball' in data && 'paddle' in data  && 'x' in data.ball && 'y' in data.ball && 'p1' in data.paddle && 'p2' in data.paddle)
 			draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2, data.score.p1, data.score.p2);
 		else if ('bR' in data && 'pH' in data && 'pW' in data)
@@ -127,14 +124,7 @@ function keyDownHandler(e)
 	else if (e.key === "z")
 		downPressed1 = true;  
 	else if (e.key === " ")
-	{
-		// if (startGame.start === true)
-		// 	startGame.start = false;			
-		// else 	
-		// 	startGame.start = true;	
-		//console.log(JSON.stringify(startGame));			
-		clt_wskt.send(JSON.stringify(startGame));	
-	}
+		clt_wskt.send(JSON.stringify(start));
 }
 
 function keyUpHandler(e)
