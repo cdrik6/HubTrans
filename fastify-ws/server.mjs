@@ -1,11 +1,12 @@
 import { Game } from './Game.js'
+// import pongRoutes from './routes/pong.js';
 const gamesById = new Map();
 const gamesByClient = new Map();
 const gamesByUser = new Map();
 let id = 0;
 
 /***************************************************************************************/
-/*************************** Server Fastify ********************************************/
+/*************************** Server Fastify with WS*************************************/
 /***************************************************************************************/
 
 import fastify from 'fastify';
@@ -13,6 +14,10 @@ const fast = fastify();
 import { WebSocketServer } from 'ws';
 import http from 'http';
 
+// // For the API
+// await fast.register(pongRoutes);
+
+// Both Fastify and WebSocket share the same port and server instance
 fast.ready().then(() => {
   
     const server = http.createServer((req, res) => {
@@ -75,7 +80,7 @@ fast.ready().then(() => {
 
     server.listen(3000, () => {
         console.log("Server listening");
-    });	
+    });		
 
 });
 
@@ -228,10 +233,3 @@ function StartInData(clt_skt)
 // 	}
 // 	return (null);
 // }
-
-// // http route
-// fast.get('/hello', async (request, reply) => {
-//         const toto = request.query.toto || 'titi';
-//         reply.send({ message: `Hello ${toto}!` }); 
-//     }
-// );
