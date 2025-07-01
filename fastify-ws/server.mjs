@@ -1,4 +1,4 @@
-import { Game } from './Game.js'
+import { Game } from './Game.mjs'
 // import pongRoutes from './routes/pong.js';
 const gamesById = new Map();
 const gamesByClient = new Map();
@@ -55,11 +55,13 @@ fast.ready().then(() => {
             }
         });                
 
-		clt_skt.on('close', () => {
+		clt_skt.on('close', (code, reason) => {
 			const game = gamesByClient.get(clt_skt);
 			if (game)
 			{
-				console.log('Server: Client disconnected in game: ' + game.id);
+				console.log("Server: Client disconnected in game: " + game.id + " " + code + " " + reason);
+				// game.players[0].close(1000, "Bye: ws of user:" + game.users[0]);
+				// game.players[1].close(1000, "Bye: ws of user:" + game.users[0]);
 				gamesByClient.delete(clt_skt);
 				// // delete game if both disconnected
 				// if ((game.players[0] && game.players[0].readyState !== WebSocket.OPEN) 
@@ -82,6 +84,36 @@ fast.ready().then(() => {
         console.log("Server listening");
     });		
 
+	// console.log(process._getActiveHandles());
+	const interServer = setInterval( () => 
+		{
+			console.log("opened socket in gamesById");
+			for (const game of gamesById.values())
+			{
+				if (game.players[0] && game.players[0].readyState === WebSocket.OPEN)
+					console.log(game.id + "\n");
+				if (game.players[1] && game.players[1].readyState === WebSocket.OPEN)
+					console.log(game.id + "\n");
+			}
+			console.log("opened socket in gamesByCient");
+			for (const game of gamesByClient.values())
+			{
+				if (game.players[0] && game.players[0].readyState === WebSocket.OPEN)
+					console.log(game.id + "\n");
+				if (game.players[1] && game.players[1].readyState === WebSocket.OPEN)
+					console.log(game.id + "\n");
+			}
+			console.log("opened socket in gamesByUser");
+			for (const game of gamesByUser.values())
+			{
+				if (game.players[0] && game.players[0].readyState === WebSocket.OPEN)
+					console.log(game.id + "\n");
+				if (game.players[1] && game.players[1].readyState === WebSocket.OPEN)
+					console.log(game.id + "\n");
+			}	
+			
+		}, 5000);
+
 });
 
 //
@@ -89,10 +121,11 @@ function ModeInData(clt_skt, data)
 {
 	console.log('nbPlayers:', data.nbPlayers);
 	console.log('userId:', data.userId);
+	// if no data.userId === null (local non register case --> create an userId)
 	if (data.nbPlayers !== null && data.userId !== null)
 	{
 		const temp = gamesByUser.get(data.userId)
-		if (temp)
+		if (temp && temp.mode === 1)
 			BackToGame(clt_skt, data, temp);
 		else
 		{
@@ -101,7 +134,8 @@ function ModeInData(clt_skt, data)
 			else if	(data.nbPlayers === 1)	
 				ModeRemote(clt_skt, data);
 		}
-	}	
+	}
+	// fermer websocket //****************************************** */
 }
 
 function ModeLocal(clt_skt, data)
@@ -124,18 +158,25 @@ function ModeLocal(clt_skt, data)
 
 function BackToGame(clt_skt, data, temp)
 {
-	if (temp.mode === 2)
+	// if (temp.mode === 2)
+	// {
+	// 	//temp.players[0].close(1000, 'bye!');
+	// 	temp.players[0] = clt_skt;
+	// 	temp.players[1] = clt_skt;
+	// }
+	// else 
+	// {
+	if (data.userId === temp.users[0])
 	{
+		temp.players[0].close(1000, "Bye: ws of user:" + temp.users[0] + " is now closed");
 		temp.players[0] = clt_skt;
-		temp.players[1] = clt_skt;
-	}
-	else 
+	}	
+	else if (data.userId === temp.users[1])
 	{
-		if (data.userId === temp.users[0])
-			temp.players[0] = clt_skt;
-		else if (data.userId === temp.users[1])
-			temp.players[1] = clt_skt;		
-	}		
+		temp.players[1].close(1000, "Bye: ws of user:" + temp.users[1] + " is now closed");
+		temp.players[1] = clt_skt;		
+	}
+	// }		
 	gamesByClient.set(clt_skt, temp);	
 	clt_skt.send(JSON.stringify(temp.settings))
 	console.log(temp.settings);
