@@ -40,7 +40,11 @@ clt_wskt.addEventListener('message', srv_msg => {
 	{
 		const data = JSON.parse(srv_msg.data);		
 		if ('ball' in data && 'paddle' in data  && 'x' in data.ball && 'y' in data.ball && 'p1' in data.paddle && 'p2' in data.paddle)
+		{
 			draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2, data.score.p1, data.score.p2);
+			if ('winner' in data && data.winner !== "")
+				output.textContent += 'Game over: ' + data.winner +' won!\n';
+		}	
 		else if ('bR' in data && 'pH' in data && 'pW' in data)
 		{				
 			ballRadius = data.bR * canvas.height;
@@ -50,9 +54,9 @@ clt_wskt.addEventListener('message', srv_msg => {
 			output.textContent += paddleHeight + '\n';
 			output.textContent += paddleWidth + '\n';
 		}
-		// else if ('dis' in data)
+		// else if ('winner' in data)
 		// {
-		// 	output.textContent += data.dis +'\n';
+		// 	output.textContent += 'Game over: ' + data.winner +' won!\n';
 		// }
 	}
 	catch (e) {
@@ -191,7 +195,8 @@ function draw(x,y, p1Y, p2Y, s1, s2)
 // 	padMovement();		
 // }
 
-/* Note: Event name
+/*
+Note: Event name
 "open" = When the connection is established
 "message" = When a message is received
 "error" = When there's an error

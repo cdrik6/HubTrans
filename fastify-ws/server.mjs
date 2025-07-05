@@ -6,13 +6,13 @@ const gamesByUser = new Map();
 let id = 0;
 
 /***************************************************************************************/
-/*************************** Server Fastify with WS*************************************/
+/*************************** Server Fastify with WS ************************************/
 /***************************************************************************************/
 
 import fastify from 'fastify';
-const fast = fastify();
 import { WebSocketServer } from 'ws';
 import http from 'http';
+const fast = fastify();
 
 // // For the API
 // await fast.register(pongRoutes);
@@ -56,10 +56,11 @@ fast.ready().then(() => {
         });                
 
 		clt_skt.on('close', (code, reason) => {
+			console.log("Server: Client disconnected (" + code + "): " + reason + "\n");
 			const game = gamesByClient.get(clt_skt);
 			if (game)
 			{
-				console.log("Server: Client disconnected in game: " + game.id + " " + code + " " + reason);
+				console.log("Server: Client disconnected in game: " + game.id + " " + reason + "\n");
 				// game.players[0].close(1000, "Bye: ws of user:" + game.users[0]);
 				// game.players[1].close(1000, "Bye: ws of user:" + game.users[0]);
 				gamesByClient.delete(clt_skt);
@@ -110,8 +111,7 @@ fast.ready().then(() => {
 					console.log(game.id + "\n");
 				if (game.players[1] && game.players[1].readyState === WebSocket.OPEN)
 					console.log(game.id + "\n");
-			}	
-			
+			}				
 		}, 5000);
 
 });
@@ -121,11 +121,12 @@ function ModeInData(clt_skt, data)
 {
 	console.log('nbPlayers:', data.nbPlayers);
 	console.log('userId:', data.userId);
-	// if no data.userId === null (local non register case --> create an userId)
-	if (data.nbPlayers !== null && data.userId !== null)
+	
+	// **** if no data.userId (local non register case --> create an userId) to do ??? ****/
+	if ((data.nbPlayers === 1 ||  data.nbPlayers === 2) && data.userId !== null)
 	{
 		const temp = gamesByUser.get(data.userId)
-		if (temp && temp.mode === 1)
+		if (temp)
 			BackToGame(clt_skt, data, temp);
 		else
 		{
@@ -135,7 +136,8 @@ function ModeInData(clt_skt, data)
 				ModeRemote(clt_skt, data);
 		}
 	}
-	// fermer websocket //****************************************** */
+	else
+		clt_skt.close(1000, "Closed, wrong mode!");
 }
 
 function ModeLocal(clt_skt, data)
@@ -158,25 +160,25 @@ function ModeLocal(clt_skt, data)
 
 function BackToGame(clt_skt, data, temp)
 {
-	// if (temp.mode === 2)
-	// {
-	// 	//temp.players[0].close(1000, 'bye!');
-	// 	temp.players[0] = clt_skt;
-	// 	temp.players[1] = clt_skt;
-	// }
-	// else 
-	// {
-	if (data.userId === temp.users[0])
+	if (temp.mode === 2)
 	{
-		temp.players[0].close(1000, "Bye: ws of user:" + temp.users[0] + " is now closed");
+		temp.players[0].close(1000, "Bye2: ws of user:" + temp.users[0] + " is now closed");
 		temp.players[0] = clt_skt;
-	}	
-	else if (data.userId === temp.users[1])
-	{
-		temp.players[1].close(1000, "Bye: ws of user:" + temp.users[1] + " is now closed");
-		temp.players[1] = clt_skt;		
+		temp.players[1] = clt_skt;
 	}
-	// }		
+	else 
+	{
+		if (data.userId === temp.users[0])
+		{
+			temp.players[0].close(1000, "Bye1: ws of user:" + temp.users[0] + " is now closed");
+			temp.players[0] = clt_skt;
+		}	
+		else if (data.userId === temp.users[1])
+		{
+			temp.players[1].close(1000, "Bye1: ws of user:" + temp.users[1] + " is now closed");
+			temp.players[1] = clt_skt;		
+		}
+	}		
 	gamesByClient.set(clt_skt, temp);	
 	clt_skt.send(JSON.stringify(temp.settings))
 	console.log(temp.settings);
@@ -255,7 +257,7 @@ function StartInData(clt_skt)
 {
 	const game = gamesByClient.get(clt_skt);					
 	console.log("game id start/pause: " + game.id);					
-	if (game)
+	if (game && game.ready === 1)
 	{
 		if (game.startGame === true)
 			game.start(false);
@@ -264,13 +266,11 @@ function StartInData(clt_skt)
 	}
 }
 
-// // id <-> game <-> clt_skt
-// function getGame(clt_skt)
-// {
-// 	for (const game of gamesById.values())
-// 	{
-// 		if (game.players[0] === clt_skt || game.players[1] === clt_skt)
-// 			return (game);
-// 	}
-// 	return (null);
-// }
+
+/*
+Note : WebSocket States
+CONNECTING (0) -> Connecting in progress
+OPEN (1)       -> Ready to send/receive data
+CLOSING (2)    -> Close initiated, not done yet
+CLOSED (3)     -> Fully closed
+*/
