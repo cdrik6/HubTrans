@@ -59,97 +59,104 @@ export class Game {
 			this.paddle1Y += this.padSpeed;	
 		this.gameState.paddle.p2 = this.paddle2Y / this.canvasHeight;
 		this.gameState.paddle.p1 = this.paddle1Y / this.canvasHeight;
+	}	
+	
+	
+	check()
+	{
+		if (this.x + this.ballRadius >= this.canvasWidth)
+		{
+			this.lost2 = true;
+			this.s1++;
+			this.gameState.score.p1 = this.s1;			
+			if (this.s1 >= this.limit && this.s1 - this.s2 >= 2)
+			{
+				this.gameState.winner = "p1";
+				clearInterval(this.intervalId);
+			}	
+		}
+		else if (this.x - this.ballRadius <= 0)
+		{
+			this.lost1 = true;
+			this.s2++;
+			this.gameState.score.p2 = this.s2;
+			if (this.s2 >= this.limit && this.s2 - this.s1 >= 2)
+			{
+				this.gameState.winner = "p2";
+				clearInterval(this.intervalId);
+			}	
+		}	
+		else if (this.y + this.ballRadius >= this.canvasHeight || this.y - this.ballRadius <= 0)
+			this.signY = -this.signY;						
+		else if (this.distBallPad2(this.x, this.y) <= 0)
+		{
+			// console.log("distBallPad2(" + this.id + ") <= 0, padTouch2 = " + this.padTouch2 + " " + d2);			
+			if (this.padTouch2 === false)
+			{
+				this.signX = -this.signX;
+				if (this.corner === true)
+					this.signY = -this.signY;			
+				this.padTouch2 = true;
+				// console.log("la padTouch2 = " + this.padTouch2);
+			}			
+		}		
+		else if (this.distBallPad1(this.x, this.y) <= 0)		
+		{
+			//  console.log("distBallPad1(" + this.id + ") <= 0, padTouch1 = " + this.padTouch1 + " " + d1);
+			if (this.padTouch1 === false)
+			{
+				this.signX = -this.signX;
+				if (this.corner === true)
+					this.signY = -this.signY;
+				this.padTouch1 = true;						
+			}
+		}
 	}
-		
+	
+	next()
+	{
+		if (!this.lost1 && !this.lost2 && this.gameState.winner === "")
+		{
+			this.x = this.x + this.signX*this.dx;
+			this.y = this.y + this.signY*this.dy;		
+			// reset padTouch crossing the middle
+			if (this.canvasWidth / 2 - this.ballRadius <= this.x && this.x <= this.canvasWidth / 2 + this.ballRadius)
+			{
+				this.padTouch2 = false;
+				this.padTouch1 = false;
+			}	
+		}
+		else
+		{
+			this.x = this.canvasWidth / 2;
+			this.y = this.canvasHeight / 2;
+			this.lost1 = false;
+			this.lost2 = false;		
+			this.signX = getRandomSign();
+			this.signY = getRandomSign();
+			this.padTouch2 = false;
+			this.padTouch1 = false;
+			//this.start(false);
+		}	
+	}
+
 	play()
 	{
 		if (this.gameState.winner === "")
 		{		
-			// check
-			if (this.x + this.ballRadius >= this.canvasWidth)
-			{
-				this.lost2 = true;
-				this.s1++;
-				this.gameState.score.p1 = this.s1;			
-				if (this.s1 >= this.limit && this.s1 - this.s2 >= 2)
-				{
-					this.gameState.winner = "p1";
-					clearInterval(this.intervalId);
-				}	
-			}
-			else if (this.x - this.ballRadius <= 0)
-			{
-				this.lost1 = true;
-				this.s2++;
-				this.gameState.score.p2 = this.s2;
-				if (this.s2 >= this.limit && this.s2 - this.s1 >= 2)
-				{
-					this.gameState.winner = "p2";
-					clearInterval(this.intervalId);
-				}	
-			}	
-			else if (this.y + this.ballRadius >= this.canvasHeight || this.y - this.ballRadius <= 0)
-				this.signY = -this.signY;						
-			else if (this.distBallPad2(this.x, this.y) <= 0)
-			{
-				// console.log("distBallPad2(" + this.id + ") <= 0, padTouch2 = " + this.padTouch2 + " " + d2);			
-				if (this.padTouch2 === false)
-				{
-					this.signX = -this.signX;
-					if (this.corner === true)
-						this.signY = -this.signY;			
-					this.padTouch2 = true;
-					// console.log("la padTouch2 = " + this.padTouch2);
-				}			
-			}		
-			else if (this.distBallPad1(this.x, this.y) <= 0)		
-			{
-				//  console.log("distBallPad1(" + this.id + ") <= 0, padTouch1 = " + this.padTouch1 + " " + d1);
-				if (this.padTouch1 === false)
-				{
-					this.signX = -this.signX;
-					if (this.corner === true)
-						this.signY = -this.signY;
-					this.padTouch1 = true;						
-				}
-			}
-
-			// next		
-			if (!this.lost1 && !this.lost2 && this.gameState.winner === "")
-			{
-				this.x = this.x + this.signX*this.dx;
-				this.y = this.y + this.signY*this.dy;		
-				// reset padTouch crossing the middle
-				if (this.canvasWidth / 2 - this.ballRadius <= this.x && this.x <= this.canvasWidth / 2 + this.ballRadius)
-				{
-					this.padTouch2 = false;
-					this.padTouch1 = false;
-				}	
-			}
-			else
-			{
-				this.x = this.canvasWidth / 2;
-				this.y = this.canvasHeight / 2;
-				this.lost1 = false;
-				this.lost2 = false;		
-				this.signX = getRandomSign();
-				this.signY = getRandomSign();
-				this.padTouch2 = false;
-				this.padTouch1 = false;
-				//this.start(false);
-			}	
+			this.check();
+			this.next();
 			this.gameState.ball.x = this.x / this.canvasWidth;
 			this.gameState.ball.y = this.y / this.canvasHeight;	
 			// console.log(gameState);
 		}
-		// else
-		// {
-		// 	clearInterval(this.intervalId);
-		// 	console.log("ici: " + this.gameState.winner);
-		// } 
+		else
+		{
+			clearInterval(this.intervalId);
+			console.log("ici: " + this.gameState.winner);
+		} 
 		return (this.gameState);    		
 	}
-	
 
 	distBallPad2(xB, yB)
 	{

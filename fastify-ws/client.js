@@ -10,6 +10,7 @@ let upPressed2 = false;
 let downPressed2 = false;
 let paddle = {p1: "", p2: ""};
 let start = {start: ""};
+let end = {end: ""};
 let mode = {nbPlayers: 1, userId: 3}; // --> catched just below
 // Set mode
 const params = new URLSearchParams(window.location.search);
@@ -43,7 +44,10 @@ clt_wskt.addEventListener('message', srv_msg => {
 		{
 			draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2, data.score.p1, data.score.p2);
 			if ('winner' in data && data.winner !== "")
-				output.textContent += 'Game over: ' + data.winner +' won!\n';
+			{
+				output.textContent += 'Game over: ' + data.winner +' won!\n';				
+				clt_wskt.send(JSON.stringify(end));
+			}
 		}	
 		else if ('bR' in data && 'pH' in data && 'pW' in data)
 		{				

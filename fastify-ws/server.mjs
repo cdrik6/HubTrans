@@ -1,5 +1,5 @@
 import { Game } from './Game.mjs'
-// import pongRoutes from './routes/pong.js';
+import pongRoutes from './routes/pong.mjs';
 const gamesById = new Map();
 const gamesByClient = new Map();
 const gamesByUser = new Map();
@@ -14,8 +14,8 @@ import { WebSocketServer } from 'ws';
 import http from 'http';
 const fast = fastify();
 
-// // For the API
-// await fast.register(pongRoutes);
+// For the API
+await fast.register(pongRoutes);
 
 // Both Fastify and WebSocket share the same port and server instance
 fast.ready().then(() => {
@@ -47,7 +47,10 @@ fast.ready().then(() => {
 				else if ('p1' in data && 'p2' in data)				
 					PaddleInData(clt_skt, data);				
 				else if ('start' in data)									
-					StartInData(clt_skt);								
+					StartInData(clt_skt);
+				else if ('end' in data)									
+					EndInData(clt_skt);
+
             }
             catch (e)
 			{
@@ -60,22 +63,9 @@ fast.ready().then(() => {
 			const game = gamesByClient.get(clt_skt);
 			if (game)
 			{
-				console.log("Server: Client disconnected in game: " + game.id + " " + reason + "\n");
-				// game.players[0].close(1000, "Bye: ws of user:" + game.users[0]);
-				// game.players[1].close(1000, "Bye: ws of user:" + game.users[0]);
+				console.log("Server: Client disconnected in game: " + game.id + " " + reason + "\n");				
 				gamesByClient.delete(clt_skt);
-				// // delete game if both disconnected
-				// if ((game.players[0] && game.players[0].readyState !== WebSocket.OPEN) 
-				// 	&& (game.players[1] && game.players[1].readyState !== WebSocket.OPEN))
-				// {
-				// 	game.end();
-				// 	gamesById.delete(game.id);
-				// 	gamesByClient.delete(game.players[0]);
-				// 	gamesByClient.delete(game.players[1]);
-				// 	gamesByClient.delete(game.users[0]);
-				// 	gamesByClient.delete(game.users[1]);
-				// 	console.log('Server: Game ' + game.id + 'deleted');
-				// }
+				
 			}
 		});
 
@@ -85,35 +75,36 @@ fast.ready().then(() => {
         console.log("Server listening");
     });		
 
-	// console.log(process._getActiveHandles());
-	const interServer = setInterval( () => 
-		{
-			console.log("opened socket in gamesById");
-			for (const game of gamesById.values())
-			{
-				if (game.players[0] && game.players[0].readyState === WebSocket.OPEN)
-					console.log(game.id + "\n");
-				if (game.players[1] && game.players[1].readyState === WebSocket.OPEN)
-					console.log(game.id + "\n");
-			}
-			console.log("opened socket in gamesByCient");
-			for (const game of gamesByClient.values())
-			{
-				if (game.players[0] && game.players[0].readyState === WebSocket.OPEN)
-					console.log(game.id + "\n");
-				if (game.players[1] && game.players[1].readyState === WebSocket.OPEN)
-					console.log(game.id + "\n");
-			}
-			console.log("opened socket in gamesByUser");
-			for (const game of gamesByUser.values())
-			{
-				if (game.players[0] && game.players[0].readyState === WebSocket.OPEN)
-					console.log(game.id + "\n");
-				if (game.players[1] && game.players[1].readyState === WebSocket.OPEN)
-					console.log(game.id + "\n");
-			}				
-		}, 5000);
-
+	// // *** debug *** /
+	// // console.log(process._getActiveHandles());	
+	// const interServer = setInterval( () => 
+	// 	{
+	// 		console.log("opened socket in gamesById");
+	// 		for (const game of gamesById.values())
+	// 		{
+	// 			if (game.players[0] && game.players[0].readyState === WebSocket.OPEN)
+	// 				console.log(game.id + "\n");
+	// 			if (game.players[1] && game.players[1].readyState === WebSocket.OPEN)
+	// 				console.log(game.id + "\n");
+	// 		}
+	// 		console.log("opened socket in gamesByCient");
+	// 		for (const game of gamesByClient.values())
+	// 		{
+	// 			if (game.players[0] && game.players[0].readyState === WebSocket.OPEN)
+	// 				console.log(game.id + "\n");
+	// 			if (game.players[1] && game.players[1].readyState === WebSocket.OPEN)
+	// 				console.log(game.id + "\n");
+	// 		}
+	// 		console.log("opened socket in gamesByUser");
+	// 		for (const game of gamesByUser.values())
+	// 		{
+	// 			if (game.players[0] && game.players[0].readyState === WebSocket.OPEN)
+	// 				console.log(game.id + "\n");
+	// 			if (game.players[1] && game.players[1].readyState === WebSocket.OPEN)
+	// 				console.log(game.id + "\n");
+	// 		}				
+	// 	}, 5000);
+	
 });
 
 //
@@ -256,7 +247,7 @@ function PaddleInData(clt_skt, data)
 function StartInData(clt_skt)
 {
 	const game = gamesByClient.get(clt_skt);					
-	console.log("game id start/pause: " + game.id);					
+	console.log("game id start/pause: " + game.id);
 	if (game && game.ready === 1)
 	{
 		if (game.startGame === true)
@@ -266,6 +257,27 @@ function StartInData(clt_skt)
 	}
 }
 
+function EndInData(clt_skt)
+{
+	const game = gamesByClient.get(clt_skt);					
+	console.log("game id end: " + game.id);
+	if (game)
+	{
+		if (game.mode === 2)
+			game.players[0].close(1000, "Game over");
+		else
+		{
+			game.players[0].close(1000, "P1 Game over");
+			game.players[1].close(1000, "P2 Game over");	
+		} 
+		gamesById.delete(game.id);
+		gamesByClient.delete(game.players[0]);
+		gamesByClient.delete(game.players[1]);
+		gamesByUser.delete(game.users[0]);
+		gamesByUser.delete(game.users[1]);
+		console.log('Server: Game ' + game.id + ' deleted');
+	}
+}
 
 /*
 Note : WebSocket States
