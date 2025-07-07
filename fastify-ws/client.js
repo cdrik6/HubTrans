@@ -57,11 +57,7 @@ clt_wskt.addEventListener('message', srv_msg => {
 			output.textContent += ballRadius + '\n';
 			output.textContent += paddleHeight + '\n';
 			output.textContent += paddleWidth + '\n';
-		}
-		// else if ('winner' in data)
-		// {
-		// 	output.textContent += 'Game over: ' + data.winner +' won!\n';
-		// }
+		}		
 	}
 	catch (e) {
 		console.error('Invalid JSON received: ', srv_msg.data);

@@ -10,11 +10,16 @@ export default async function pongRoutes(fast, options)
 		}
 	);
 
-	// fast.get('/score', async (request, reply) => {
-	// 		const toto = request.query.toto || 'titi';
-	// 		reply.send({ message: `Hello ${toto}!` }); 
-	// 	}
-	// );
+	fast.get('/game/ball', async (request, reply) => {
+			const toto = request.query.toto || 'titi';
+			reply.send({ message: `Hello ${toto}!` }); 
+		}
+	);
+
+	fast.get('/game/start', async (req, res) => {
+    	const gameState = game.start(); // however you start a game
+    	return gameState;
+	});
 
 	
 }

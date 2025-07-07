@@ -1,5 +1,5 @@
 import { Game } from './Game.mjs'
-import pongRoutes from './routes/pong.mjs';
+import pongRoutes from './routes/pongAPI.mjs';
 const gamesById = new Map();
 const gamesByClient = new Map();
 const gamesByUser = new Map();
