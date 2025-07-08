@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pong API Test</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; }
+        canvas { background: grey; display: block; margin: auto; }
+        /* p { text-align: left; }
+        button { display:block; text-align: left; } */
+    </style>
+</head>
+<body>
+    <h1>API Test - Pong Game UI</h1>    
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <br>
+    <button onclick="hello()">Hello</button>    
+    <button onclick="getBall()">Ball</button>    
+    <!-- <button onclick="getScore()">Score</button>     -->
+    <p id="status"></p>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        
+        function getBall()
+        {
+            fetch('http://localhost:3000/game/ball')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("status").textContent = data.ball.x + " " + data.ball.y;
+                    drawBall(data);
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById("status").textContent = "Error starting game.";
+                });
+        }
+        
+        function drawBall(data)
+        {            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "red";
+            const ballX = data.ball.x * canvas.width;
+            const ballY = data.ball.y * canvas.height;
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, 10, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        function hello()
+        {
+            fetch('http://localhost:3000/hello')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("status").textContent = data.message
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById("status").textContent = "Error starting game.";
+                });
+        }
+
+    </script>
+</body>
+</html>

@@ -4,22 +4,25 @@
 export default async function pongRoutes(fast, options)
 {
 	fast.get('/hello', async (request, reply) => {
-			const toto = request.query.toto || 'titi';
-			reply.send({ message: `Hello ${toto}!` }); 
-			//reply.send("Hello\n"); 
+			// const name = request.query.name || 'titi';
+			// reply.send({ message: "Hello " + name + "!" });
+			reply.send({message: "Hello"}); 
 		}
 	);
 
 	fast.get('/game/ball', async (request, reply) => {
-			const toto = request.query.toto || 'titi';
-			reply.send({ message: `Hello ${toto}!` }); 
+			const game = fast.apiGame;
+			const gameState = game.gameState; //game.play();
+			return (gameState);
 		}
 	);
 
-	fast.get('/game/start', async (req, res) => {
-    	const gameState = game.start(); // however you start a game
-    	return gameState;
-	});
-
 	
 }
+
+// fast.post('/game/move', async (req, reply) => {
+//         const game = fast.apiGame;
+//         const { player, direction } = req.body; // e.g., { player: 'p1', direction: 'up' }
+//         game.move(player, direction); // you implement this logic
+//         return game.gameState;
+//     });

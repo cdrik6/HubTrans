@@ -1,10 +1,3 @@
-import { Game } from './Game.mjs'
-import pongRoutes from './routes/pongAPI.mjs';
-const gamesById = new Map();
-const gamesByClient = new Map();
-const gamesByUser = new Map();
-let id = 0;
-
 /***************************************************************************************/
 /*************************** Server Fastify with WS ************************************/
 /***************************************************************************************/
@@ -14,13 +7,60 @@ import { WebSocketServer } from 'ws';
 import http from 'http';
 const fast = fastify();
 
-// For the API
+/***************************************************************************************/
+/*************************** Game class and Maps    ************************************/
+/***************************************************************************************/
+
+import { Game } from './Game.mjs'
+const gamesById = new Map();
+const gamesByClient = new Map();
+const gamesByUser = new Map();
+let id = 0;
+
+/***************************************************************************************/
+/*************************** Option: To serve index.html with fastify *****************/
+/***************************************************************************************/
+
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fastifyStatic from '@fastify/static';
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
+
+// Register static plugin
+await fast.register(fastifyStatic, {root: path.join(dirname, 'public')});
+
+/***************************************************************************************/
+/*************************** Option: Allow cross-origin requests ***********************/
+/***************************************************************************************/
+
+// API called from a web page running on a different origin (domain/port/protocol)
+import fastifyCors from '@fastify/cors';
+await fast.register(fastifyCors, { origin: '*' });
+// need to be restricted to specific domains
+
+/***************************************************************************************/
+/*************************** Routes from API *******************************************/
+/***************************************************************************************/
+
+import pongRoutes from './routes/pongAPI.mjs';
+
+// API client gets its own "game"
+const apiGame = new Game();
+// const apiGame = gamesById.get(0);
+fast.decorate('apiGame', apiGame);
+
+// For the API, ensures routes are registered before the server is ready
 await fast.register(pongRoutes);
 
+/***************************************************************************************/
+/*************************** Server running ********************************************/
+/***************************************************************************************/
+
 // Both Fastify and WebSocket share the same port and server instance
-fast.ready().then(() => {
-  
-    const server = http.createServer((req, res) => {
+fast.ready().then(() => {     
+
+	const server = http.createServer((req, res) => {
         fast.routing(req, res);
     });
     
@@ -74,6 +114,8 @@ fast.ready().then(() => {
     server.listen(3000, () => {
         console.log("Server listening");
     });		
+
+
 
 	// // *** debug *** /
 	// // console.log(process._getActiveHandles());	

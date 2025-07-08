@@ -150,11 +150,8 @@ export class Game {
 			this.gameState.ball.y = this.y / this.canvasHeight;	
 			// console.log(gameState);
 		}
-		else
-		{
-			clearInterval(this.intervalId);
-			console.log("ici: " + this.gameState.winner);
-		} 
+		else		
+			clearInterval(this.intervalId);		 
 		return (this.gameState);    		
 	}
 

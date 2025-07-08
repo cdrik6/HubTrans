@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@fastify/cors": "^11.0.1",
+    "@fastify/static": "^8.2.0",
     "fastify": "^5.3.3"
   },
   "name": "hubtrans",
@@ -20,6 +22,5 @@
   "bugs": {
     "url": "https://github.com/cdrik6/HubTrans/issues"
   },
-  "homepage": "https://github.com/cdrik6/HubTrans#readme",
-  "devDependencies": {}
+  "homepage": "https://github.com/cdrik6/HubTrans#readme"
 }
