@@ -12,55 +12,126 @@
 </head>
 <body>
     <h1>API Test - Pong Game UI</h1>    
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
     <br>
-    <button onclick="hello()">Hello</button>    
-    <button onclick="getBall()">Ball</button>    
+    <button onclick="hello()">Hello</button>
+    <button onclick="postInit()">Init</button>
+    <button onclick="getState(gameId)">State</button>
     <!-- <button onclick="getScore()">Score</button>     -->
     <p id="status"></p>
 
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
+        const status = document.getElementById("status");
+        let gameId = null;
+        let ballRadius = 10;
+		let paddleHeight = 80;
+		let paddleWidth = 15;
         
-        function getBall()
+        function getState(gameId)
         {
-            fetch('http://localhost:3000/game/ball')
+            if (gameId === null)
+                status.textContent = "Game ID is missing, initialize a game first.";
+            else
+            {
+                // status.textContent = gameId;
+                fetch('http://localhost:3000/game/state?id=' + gameId, { method: 'GET' })
+                    .then(res => res.json())
+                    .then(data => {
+                        // status.textContent = data.ball.x + " " + data.ball.y;
+                        draw(data);                        
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        status.textContent = "Error starting game.";
+                    });
+            }
+        }        
+
+        function postInit()
+        {
+            fetch('http://localhost:3000/game/init', { method: 'POST' })
                 .then(res => res.json())
                 .then(data => {
-                    document.getElementById("status").textContent = data.ball.x + " " + data.ball.y;
-                    drawBall(data);
+                    gameId = data.id;
+                    ballRadius = data.bR * canvas.height;
+			        paddleHeight = data.pH * canvas.height;
+			        paddleWidth = data.pW * canvas.height;
+                    status.textContent = "Pong Game id: " + gameId + " started";
                 })
                 .catch(err => {
                     console.error(err);
-                    document.getElementById("status").textContent = "Error starting game.";
+                    status.textContent = "Error starting game.";
                 });
-        }
-        
-        function drawBall(data)
-        {            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "red";
-            const ballX = data.ball.x * canvas.width;
-            const ballY = data.ball.y * canvas.height;
-            ctx.beginPath();
-            ctx.arc(ballX, ballY, 10, 0, 2 * Math.PI);
-            ctx.fill();
         }
 
         function hello()
         {
-            fetch('http://localhost:3000/hello')
+            fetch('http://localhost:3000/hello', { method: 'GET' })
                 .then(res => res.json())
                 .then(data => {
-                    document.getElementById("status").textContent = data.message
+                    status.textContent = data.message
                 })
                 .catch(err => {
                     console.error(err);
-                    document.getElementById("status").textContent = "Error starting game.";
+                    status.textContent = "Error starting game.";
                 });
+        }
+        
+        function drawBall(x, y)
+        {	
+            ctx.beginPath();		
+            ctx.arc(x , y, ballRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(255, 0, 0, 1)";
+            ctx.fill();	
+            ctx.closePath();
+            console.log("x = " + x + " y = " + y);
+        }
+
+        function drawPaddles(paddle1Y, paddle2Y)
+        {
+            ctx.beginPath();
+            ctx.rect(0, paddle1Y, paddleWidth, paddleHeight);
+            ctx.rect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+            console.log("P1 = " + paddle1Y + " " + (paddle1Y + paddleHeight) + " P2 = " + paddle2Y + " " + (paddle2Y + paddleHeight) );
+        }
+
+        function printScore(s1, s2)
+        {
+            const text = " - "
+            ctx.font = "30px sans serif";
+            ctx.fillStyle = "rgba(0, 100, 0, 1)";
+            let pos = canvas.width/2 - ctx.measureText(text).width/2;	
+            ctx.fillText(text, pos, 40);
+            ctx.fillText(s1, pos - ctx.measureText(s1).width, 40);
+            ctx.fillText(s2, pos + ctx.measureText(text).width, 40);
+        }
+        
+        function draw(data)
+        {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);	
+            printScore(data.score.p1, data.score.p2);	
+            drawBall(data.ball.x * canvas.width, data.ball.y * canvas.height);	
+            drawPaddles(data.paddle.p1 * canvas.height, data.paddle.p2 * canvas.height);
+            // padMovement();		
         }
 
     </script>
 </body>
 </html>
+
+
+<!-- function drawBall(data)
+{            
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "red";
+    const ballX = data.ball.x * canvas.width;
+    const ballY = data.ball.y * canvas.height;
+    ctx.beginPath();
+    ctx.arc(ballX, ballY, 10, 0, 2 * Math.PI);
+    ctx.fill();
+} -->

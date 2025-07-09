@@ -42,7 +42,8 @@ clt_wskt.addEventListener('message', srv_msg => {
 		const data = JSON.parse(srv_msg.data);		
 		if ('ball' in data && 'paddle' in data  && 'x' in data.ball && 'y' in data.ball && 'p1' in data.paddle && 'p2' in data.paddle)
 		{
-			draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2, data.score.p1, data.score.p2);
+			draw(data);
+			// draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2, data.score.p1, data.score.p2);
 			if ('winner' in data && data.winner !== "")
 			{
 				output.textContent += 'Game over: ' + data.winner +' won!\n';				
@@ -148,7 +149,7 @@ function keyUpHandler(e)
 function drawBall(x, y)
 {	
 	ctx.beginPath();		
-	ctx.arc(x , y, ballRadius, 0, Math.PI * 2);
+	ctx.arc(x , y, ballRadius, 0, 2 * Math.PI);
 	ctx.fillStyle = "rgba(255, 0, 0, 1)";
 	ctx.fill();	
 	ctx.closePath();
@@ -177,23 +178,14 @@ function printScore(s1, s2)
 	ctx.fillText(s2, pos + ctx.measureText(text).width, 40);
 }
 
-function draw(x,y, p1Y, p2Y, s1, s2)
+function draw(data)
 {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);	
-	printScore(s1,s2);	
-	drawBall(x * canvas.width, y * canvas.height);	
-	drawPaddles(p1Y * canvas.height, p2Y * canvas.height);
+	printScore(data.score.p1, data.score.p2);	
+	drawBall(data.ball.x * canvas.width, data.ball.y * canvas.height);	
+	drawPaddles(data.paddle.p1 * canvas.height, data.paddle.p2 * canvas.height);
 	padMovement();		
 }
-
-// function initDraw()
-// {
-// 	ctx.clearRect(0, 0, canvas.width, canvas.height);	
-// 	printScore(0,0);	
-// 	drawBall(canvas.width/2, canvas.height/2);	
-// 	drawPaddles(canvas.height/2 - paddleHeight/2, canvas.height/2 - paddleHeight/2);
-// 	padMovement();		
-// }
 
 /*
 Note: Event name

@@ -18,7 +18,7 @@ const gamesByUser = new Map();
 let id = 0;
 
 /***************************************************************************************/
-/*************************** Option: To serve index.html with fastify *****************/
+/*************************** Temp: To serve index.html with fastify ********************/
 /***************************************************************************************/
 
 import path from 'path';
@@ -26,12 +26,11 @@ import { fileURLToPath } from 'url';
 import fastifyStatic from '@fastify/static';
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
-
 // Register static plugin
-await fast.register(fastifyStatic, {root: path.join(dirname, 'public')});
+await fast.register(fastifyStatic, { root: path.join(dirname, 'public') });
 
 /***************************************************************************************/
-/*************************** Option: Allow cross-origin requests ***********************/
+/*************************** Temp: Allow cross-origin requests *************************/
 /***************************************************************************************/
 
 // API called from a web page running on a different origin (domain/port/protocol)
@@ -45,10 +44,10 @@ await fast.register(fastifyCors, { origin: '*' });
 
 import pongRoutes from './routes/pongAPI.mjs';
 
-// API client gets its own "game"
-const apiGame = new Game();
-// const apiGame = gamesById.get(0);
-fast.decorate('apiGame', apiGame);
+// // API client gets its own "game"
+// const apiGame = new Game();
+// // const apiGame = gamesById.get(0);
+// fast.decorate('apiGame', apiGame);
 
 // For the API, ensures routes are registered before the server is ready
 await fast.register(pongRoutes);
@@ -104,8 +103,7 @@ fast.ready().then(() => {
 			if (game)
 			{
 				console.log("Server: Client disconnected in game: " + game.id + " " + reason + "\n");				
-				gamesByClient.delete(clt_skt);
-				
+				gamesByClient.delete(clt_skt);				
 			}
 		});
 
@@ -114,8 +112,6 @@ fast.ready().then(() => {
     server.listen(3000, () => {
         console.log("Server listening");
     });		
-
-
 
 	// // *** debug *** /
 	// // console.log(process._getActiveHandles());	
@@ -273,7 +269,7 @@ function PaddleInData(clt_skt, data)
 		if (game.mode === 2)
 		{
 			// console.log('pad1:', data.p1);
-			// console.log('pad2:', data.p2);				
+			// console.log('xpad2:', data.p2);				
 			game.paddlesY(data.p1, data.p2);
 		}
 		else 
