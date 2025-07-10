@@ -14,7 +14,7 @@
     <h1>API Test - Pong Game UI</h1>    
     <button onclick="hello()">Hello</button>
     <button onclick="postInit()">Init</button>
-    <button onclick="postStart(startGame)">Start/Pause</button>
+    <button onclick="postStart()">Start/Pause</button>
     <button id="getStateBtn">State</button>
     <!-- <button onclick="getState(gameId)">State</button> -->
     <button onclick="getWinner(gameId)">Winner</button>
@@ -110,37 +110,20 @@
             // });
         }
         
-        function postStart(startGame)
-        {            
-            // if (startGame)
-            // {
-                startGame=(startGame===true?false:true);
-                fetch("http://localhost:3000/game/start", {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: gameId, startGame: startGame })
-                })
-                .then(res => res.json())
-                .then(data => { status.textContent = data.message; })
-                .catch(err => {
-                    console.error(err);
-                    status.textContent = "Error starting/pausing game";
-                });
-            // }
-            // else
-            // {
-            //     fetch("http://localhost:3000/game/start", {
-            //         method: 'POST',
-            //         headers: { 'Content-Type': 'application/json' },
-            //         body: JSON.stringify({ id: gameId, startGame: true })
-            //     })
-            //     .then(res => res.json())
-            //     .then(data => { status.textContent = data.message; })
-            //     .catch(err => {
-            //         console.error(err);
-            //         status.textContent = "Error starting/pausing game";
-            //     });
-            // }
+        function postStart()
+        {           
+            startGame = !startGame;
+            fetch("http://localhost:3000/game/start", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: gameId, startGame: startGame })
+            })
+            .then(res => res.json())
+            .then(data => { status.textContent = data.message; })
+            .catch(err => {
+                console.error(err);
+                status.textContent = "Error starting/pausing game";
+            });            
         }
 
         function postInit()
