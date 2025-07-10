@@ -14,12 +14,12 @@
     <h1>API Test - Pong Game UI</h1>    
     <button onclick="hello()">Hello</button>
     <button onclick="postInit()">Init</button>
+    <button onclick="postStart(startGame)">Start/Pause</button>
     <button id="getStateBtn">State</button>
     <!-- <button onclick="getState(gameId)">State</button> -->
     <button onclick="getWinner(gameId)">Winner</button>
     <p id="status">(status)</p>    
-    <canvas id="gameCanvas" width="600" height="400"></canvas>
-    <br>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>    
     <!-- <button onclick="upP1()" style="display:inline-block; text-align: left;">Up</button>
     <button onclick="downP1()" style="display:inline-block; text-align: right;">Down</button>
     <button onclick="upP2()" style="display:inline-block; text-align: left;">Up</button>
@@ -30,6 +30,7 @@
         const ctx = canvas.getContext("2d");
         const status = document.getElementById("status");
         let gameId = null;
+        let startGame = false;
         let ballRadius = 10;
 		let paddleHeight = 80;
 		let paddleWidth = 15;
@@ -39,7 +40,7 @@
         let upPressed1 = false;
         let downPressed1 = false;
         let upPressed2 = false;
-        let downPressed2 = false;
+        let downPressed2 = false;        
 
         document.getElementById("getStateBtn").addEventListener("click", () => {
                 if (intervalState === null)
@@ -57,103 +58,121 @@
         function getState(gameId)
         {
             if (gameId === null)
-                status.textContent = "Game ID is missing, initialize a game first";
-            else
-            {
-                // status.textContent = gameId;
-                fetch("http://localhost:3000/game/state?id=" + gameId, { method: 'GET' })
-                    .then(res => res.json())
-                    .then(data => {
-                        // postPaddles(gameId, p1, p2);                   
-                        draw(data);                        
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        status.textContent = "Error getting gameState";
-                    });
-            }
+                return(status.textContent = "Game ID is missing, initialize a game first");
+            fetch("http://localhost:3000/game/state?id=" + gameId, { method: 'GET' })
+            .then(res => res.json())
+            .then(data => { draw(data); })
+            .catch(err => {
+                console.error(err);
+                status.textContent = "Error getting gameState";
+            });            
         }
         
         function getWinner(gameId)
         {
             if (gameId === null)
-                status.textContent = "Game ID is missing, initialize a game first";
-            else
-            {                   
-                fetch("http://localhost:3000/game/winner?id=" + gameId, { method: 'GET' })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.winner === "")
-                            status.textContent = "No Winner yet";
-                        else if (data.winner === "p1")
-                            status.textContent = "Winner: Player1!";
-                        else if (data.winner === "p2")
-                            status.textContent = "Winner: Player2!";
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        status.textContent = "Error getting winner";
-                    });
-            }
+                return(status.textContent = "Game ID is missing, initialize a game first");                               
+            fetch("http://localhost:3000/game/winner?id=" + gameId, { method: 'GET' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.winner === "")
+                    status.textContent = "No Winner yet";
+                else if (data.winner === "p1")
+                    status.textContent = "Winner: Player1!";
+                else if (data.winner === "p2")
+                    status.textContent = "Winner: Player2!";
+            })
+            .catch(err => {
+                console.error(err);
+                status.textContent = "Error getting winner";
+            });
         }
 
         function postPaddles(gameId, p1, p2)
         {
             if (gameId === null)
-                status.textContent = "Game ID is missing, initialize a game first";
-            // else if (p1 === null && p2 === null)
-            //     status.textContent = "Paddles missing";
-            else
-            {                   
-                fetch("http://localhost:3000/game/paddles", {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id: gameId, p1: p1, p2: p2 })
-                    })
-                    // .then(res => res.json())
-                    // // .then(data => {                        
-                    // //     if (data.success)
-                    // //         status.textContent = "Paddles updated";
-                    // //     else                            
-                    // //         status.textContent = "Paddles not updated";
-                    // // })
-                    // .catch(err => {
-                    //     console.error(err);
-                    //     status.textContent = "Error posting paddles";
-                    // });
-            }
-        }        
+               return (status.textContent = "Game ID is missing, initialize a game first");            
+            fetch("http://localhost:3000/game/paddles", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: gameId, p1: p1, p2: p2 })
+            })
+            // .then(res => res.json())
+            // // .then(data => {                        
+            // //     if (data.success)
+            // //         status.textContent = "Paddles updated";
+            // //     else                            
+            // //         status.textContent = "Paddles not updated";
+            // // })
+            // .catch(err => {
+            //     console.error(err);
+            //     status.textContent = "Error posting paddles";
+            // });
+        }
+        
+        function postStart(startGame)
+        {            
+            // if (startGame)
+            // {
+                startGame=(startGame===true?false:true);
+                fetch("http://localhost:3000/game/start", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: gameId, startGame: startGame })
+                })
+                .then(res => res.json())
+                .then(data => { status.textContent = data.message; })
+                .catch(err => {
+                    console.error(err);
+                    status.textContent = "Error starting/pausing game";
+                });
+            // }
+            // else
+            // {
+            //     fetch("http://localhost:3000/game/start", {
+            //         method: 'POST',
+            //         headers: { 'Content-Type': 'application/json' },
+            //         body: JSON.stringify({ id: gameId, startGame: true })
+            //     })
+            //     .then(res => res.json())
+            //     .then(data => { status.textContent = data.message; })
+            //     .catch(err => {
+            //         console.error(err);
+            //         status.textContent = "Error starting/pausing game";
+            //     });
+            // }
+        }
 
         function postInit()
         {
             fetch("http://localhost:3000/game/init", { method: 'POST' })
-                .then(res => res.json())
-                .then(data => {
-                    gameId = data.id;
-                    ballRadius = data.bR * canvas.height;
-			        paddleHeight = data.pH * canvas.height;
-			        paddleWidth = data.pW * canvas.height;
-                    status.textContent = "Pong Game id: " + gameId + " started";
-                })
-                .catch(err => {
-                    console.error(err);
-                    status.textContent = "Error initializing game";
-                });
+            .then(res => res.json())
+            .then(data => {
+                gameId = data.id;
+                ballRadius = data.bR * canvas.height;
+                paddleHeight = data.pH * canvas.height;
+                paddleWidth = data.pW * canvas.height;
+                status.textContent = "Pong Game id: " + gameId + " started";
+            })
+            .catch(err => {
+                console.error(err);
+                status.textContent = "Error initializing game";
+            });
         }
 
         function hello()
         {
             fetch("http://localhost:3000/hello", { method: 'GET' })
-                .then(res => res.json())
-                .then(data => {
-                    status.textContent = data.message
-                })
-                .catch(err => {
-                    console.error(err);
-                    status.textContent = "Error saying hello";
-                });
+            .then(res => res.json())
+            .then(data => { status.textContent = data.message })
+            .catch(err => {
+                console.error(err);
+                status.textContent = "Error saying hello";
+            });
         }
         
+        /************************ tools *************************/
+
         function drawBall(x, y)
         {	
             ctx.beginPath();		
