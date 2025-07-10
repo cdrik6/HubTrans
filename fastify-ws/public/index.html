@@ -12,13 +12,18 @@
 </head>
 <body>
     <h1>API Test - Pong Game UI</h1>    
-    <canvas id="gameCanvas" width="600" height="400"></canvas>
-    <br>
     <button onclick="hello()">Hello</button>
     <button onclick="postInit()">Init</button>
-    <button onclick="getState(gameId)">State</button>
-    <!-- <button onclick="getScore()">Score</button>     -->
-    <p id="status"></p>
+    <button id="getStateBtn">State</button>
+    <!-- <button onclick="getState(gameId)">State</button> -->
+    <button onclick="getWinner(gameId)">Winner</button>
+    <p id="status">(status)</p>    
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <br>
+    <!-- <button onclick="upP1()" style="display:inline-block; text-align: left;">Up</button>
+    <button onclick="downP1()" style="display:inline-block; text-align: right;">Down</button>
+    <button onclick="upP2()" style="display:inline-block; text-align: left;">Up</button>
+    <button onclick="downP2()" style="display:inline-block; text-align: right;">Down</button> -->    
 
     <script>
         const canvas = document.getElementById("gameCanvas");
@@ -28,30 +33,100 @@
         let ballRadius = 10;
 		let paddleHeight = 80;
 		let paddleWidth = 15;
+        let intervalState = null
+        let p1 = null;
+        let p2 = null;
+        let upPressed1 = false;
+        let downPressed1 = false;
+        let upPressed2 = false;
+        let downPressed2 = false;
+
+        document.getElementById("getStateBtn").addEventListener("click", () => {
+                if (intervalState === null)
+                    intervalState = setInterval( () => { 
+                        postPaddles(gameId, p1, p2);
+                        getState(gameId);
+                    }, 10);
+                else
+                {
+                    clearInterval(intervalState);
+                    intervalState = null;
+                } 
+            });        
         
         function getState(gameId)
         {
             if (gameId === null)
-                status.textContent = "Game ID is missing, initialize a game first.";
+                status.textContent = "Game ID is missing, initialize a game first";
             else
             {
                 // status.textContent = gameId;
-                fetch('http://localhost:3000/game/state?id=' + gameId, { method: 'GET' })
+                fetch("http://localhost:3000/game/state?id=" + gameId, { method: 'GET' })
                     .then(res => res.json())
                     .then(data => {
-                        // status.textContent = data.ball.x + " " + data.ball.y;
+                        // postPaddles(gameId, p1, p2);                   
                         draw(data);                        
                     })
                     .catch(err => {
                         console.error(err);
-                        status.textContent = "Error starting game.";
+                        status.textContent = "Error getting gameState";
                     });
+            }
+        }
+        
+        function getWinner(gameId)
+        {
+            if (gameId === null)
+                status.textContent = "Game ID is missing, initialize a game first";
+            else
+            {                   
+                fetch("http://localhost:3000/game/winner?id=" + gameId, { method: 'GET' })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.winner === "")
+                            status.textContent = "No Winner yet";
+                        else if (data.winner === "p1")
+                            status.textContent = "Winner: Player1!";
+                        else if (data.winner === "p2")
+                            status.textContent = "Winner: Player2!";
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        status.textContent = "Error getting winner";
+                    });
+            }
+        }
+
+        function postPaddles(gameId, p1, p2)
+        {
+            if (gameId === null)
+                status.textContent = "Game ID is missing, initialize a game first";
+            // else if (p1 === null && p2 === null)
+            //     status.textContent = "Paddles missing";
+            else
+            {                   
+                fetch("http://localhost:3000/game/paddles", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: gameId, p1: p1, p2: p2 })
+                    })
+                    // .then(res => res.json())
+                    // // .then(data => {                        
+                    // //     if (data.success)
+                    // //         status.textContent = "Paddles updated";
+                    // //     else                            
+                    // //         status.textContent = "Paddles not updated";
+                    // // })
+                    // .catch(err => {
+                    //     console.error(err);
+                    //     status.textContent = "Error posting paddles";
+                    // });
             }
         }        
 
         function postInit()
         {
-            fetch('http://localhost:3000/game/init', { method: 'POST' })
+            fetch("http://localhost:3000/game/init", { method: 'POST' })
                 .then(res => res.json())
                 .then(data => {
                     gameId = data.id;
@@ -62,20 +137,20 @@
                 })
                 .catch(err => {
                     console.error(err);
-                    status.textContent = "Error starting game.";
+                    status.textContent = "Error initializing game";
                 });
         }
 
         function hello()
         {
-            fetch('http://localhost:3000/hello', { method: 'GET' })
+            fetch("http://localhost:3000/hello", { method: 'GET' })
                 .then(res => res.json())
                 .then(data => {
                     status.textContent = data.message
                 })
                 .catch(err => {
                     console.error(err);
-                    status.textContent = "Error starting game.";
+                    status.textContent = "Error saying hello";
                 });
         }
         
@@ -117,7 +192,83 @@
             printScore(data.score.p1, data.score.p2);	
             drawBall(data.ball.x * canvas.width, data.ball.y * canvas.height);	
             drawPaddles(data.paddle.p1 * canvas.height, data.paddle.p2 * canvas.height);
-            // padMovement();		
+            padMovement();
+        }
+
+        document.addEventListener("keydown", keyDownHandler, false);
+        document.addEventListener("keyup", keyUpHandler, false);
+
+        function padMovement()
+        {
+            if (upPressed2 === true && upPressed1 === true)
+            {  	  
+                p2 = "up";
+                p1 = "up";                
+            }
+            else if (upPressed2 === true && upPressed1 === false)
+            {  	  
+                p2 = "up";
+                p1 = "";                
+            }
+            else if (upPressed2 === false && upPressed1 === true)
+            {  	  
+                p2 = "";
+                p1 = "up";                
+            }
+            else if (downPressed2 === true  && downPressed1 === true)
+            {  	  
+                p2 = "down";
+                p1 = "down";                
+            }
+            else if (downPressed2 === true && downPressed1 === false)
+            {  	  
+                p2 = "down";
+                p1 = "";                
+            }	
+            else if (downPressed2 === false && downPressed1 === true)
+            {  	  
+                p2 = "";
+                p1 = "down";                
+            }	
+            else if (upPressed2 === true && downPressed1 === true)
+            {  	  
+                p2 = "up";
+                p1 = "down";                
+            }
+            else if (downPressed2 === true && upPressed1 === true)
+            {  	  
+                p2 = "down";
+                p1 = "up";                
+            }
+            else if (downPressed2 === false && upPressed1 === false)
+            {  	  
+                p2 = "";
+                p1 = "";
+            }
+        }
+
+        function keyDownHandler(e)
+        {
+            if (e.key === "Up" || e.key === "ArrowUp")
+                upPressed2 = true;
+            else if (e.key === "Down" || e.key === "ArrowDown")
+                downPressed2 = true;  
+            else if (e.key === "w")
+                upPressed1 = true;  
+            else if (e.key === "s")
+                downPressed1 = true;
+        }
+
+        function keyUpHandler(e)
+        {
+            if (e.key === "Up" || e.key === "ArrowUp") 	
+                upPressed2 = false;  
+            else if (e.key === "Down" || e.key === "ArrowDown")
+                downPressed2 = false;  
+            else if (e.key === "w")
+                upPressed1 = false;	  
+            else if (e.key === "s")
+                downPressed1 = false;  
         }
 
     </script>

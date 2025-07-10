@@ -126,9 +126,9 @@ function keyDownHandler(e)
 		upPressed2 = true;
 	else if (e.key === "Down" || e.key === "ArrowDown")
 		downPressed2 = true;  
-	else if (e.key === "q")
+	else if (e.key === "w")
 		upPressed1 = true;  
-	else if (e.key === "z")
+	else if (e.key === "s")
 		downPressed1 = true;  
 	else if (e.key === " ")
 		clt_wskt.send(JSON.stringify(start));
@@ -140,9 +140,9 @@ function keyUpHandler(e)
 		upPressed2 = false;  
 	else if (e.key === "Down" || e.key === "ArrowDown")
 		downPressed2 = false;  
-	else if (e.key === "q")
+	else if (e.key === "w")
 		upPressed1 = false;	  
-	else if (e.key === "z")
+	else if (e.key === "s")
 		downPressed1 = false;  
 }
 
