@@ -7,9 +7,9 @@ let apiId = 0;
 
 export default async function pongRoutes(fast, options)
 {
-	// from /hello?name="toto" for testing
+	// from /hello for testing
 	fast.get('/hello', async (request, reply) => {		
-		reply.send({ message: "Hello Pong API!" });
+		reply.send({ message: "Hello from Pong API!" });
 	});
 
 	// **** how to protect for infinite post requests ??? *************/
@@ -20,16 +20,19 @@ export default async function pongRoutes(fast, options)
 			apigamesById.set(apiId, game);
 			game.ready = 1;
 			game.mode = 2;
-			apiId++;
-			// game.intervalId = setInterval( () => { game.play();	}, game.fq);			
+			apiId++;			
 			reply.send({ id: game.id, bR: 1/40, pH: 1/5, pW: 3/80 });
-		}	
+		}
+		else {
+  			reply.code(429).send({ error: 'Max number of games reached' });}	
 	});
 
 	fast.post('/game/start', async (request, reply) => {			
 		const { id, startGame } = request.body;
 		if (isNaN(Number(id)))
-			return(reply.code(400).send({ error: 'Invalid or missing Game ID' }));	
+			return(reply.code(400).send({ error: 'Invalid or missing Game ID' }));
+		if (typeof startGame !== 'boolean')
+  			return(reply.code(400).send({ error: 'Missing or invalid startGame type' }));
 		const game = apigamesById.get(id);
 		if (!game)			
 			return(reply.code(404).send({ error: 'Game not found' }));			
@@ -52,13 +55,8 @@ export default async function pongRoutes(fast, options)
 			return(reply.code(400).send({ error: 'Invalid or missing Game ID' }));	
 		const game = apigamesById.get(id);
 		if (!game)			
-			return(reply.code(404).send({ error: 'Game not found' }));			
-		// const pad1 = request.query.p1;
-		// const pad2 = request.query.p2;
-		// if (!pad1 || !pad2)
-		// 	return(reply.code(400).send({ error: 'Invalid paddle movement' }));
-		game.paddlesY(p1, p2);
-		// reply.send(game.gameState);
+			return(reply.code(404).send({ error: 'Game not found' }));					
+		game.paddlesY(p1, p2);		
 		reply.send({ success: true });
 	});	
 
@@ -81,6 +79,6 @@ export default async function pongRoutes(fast, options)
 		const game = apigamesById.get(id);
 		if (!game)			
 			return(reply.code(404).send({ error: 'Game not found' }));			
-		reply.send(game.gameState);
+		reply.send({ winner: game.gameState.winner });
 	});	
 }

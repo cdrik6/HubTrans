@@ -5,30 +5,26 @@
     <title>Pong API Test</title>
     <style>
         body { font-family: sans-serif; text-align: center; }
-        canvas { background: grey; display: block; margin: auto; }
-        /* p { text-align: left; }
-        button { display:block; text-align: left; } */
+        canvas { background: grey; display: block; margin: auto; }        
     </style>
 </head>
 <body>
     <h1>API Test - Pong Game UI</h1>    
-    <button onclick="hello()">Hello</button>
+    <button onclick="getHello()">Hello</button>
     <button onclick="postInit()">Init</button>
     <button onclick="postStart()">Start/Pause</button>
-    <button id="getStateBtn">State</button>
-    <!-- <button onclick="getState(gameId)">State</button> -->
+    
+    <button onclick="getState(gameId)">State</button>
     <button onclick="getWinner(gameId)">Winner</button>
     <p id="status">(status)</p>    
     <canvas id="gameCanvas" width="600" height="400"></canvas>    
-    <!-- <button onclick="upP1()" style="display:inline-block; text-align: left;">Up</button>
-    <button onclick="downP1()" style="display:inline-block; text-align: right;">Down</button>
-    <button onclick="upP2()" style="display:inline-block; text-align: left;">Up</button>
-    <button onclick="downP2()" style="display:inline-block; text-align: right;">Down</button> -->    
+    <!-- <p id="stateGame">(stategame)</p>  -->
 
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const status = document.getElementById("status");
+        // const state = document.getElementById("stateGame");
         let gameId = null;
         let startGame = false;
         let ballRadius = 10;
@@ -40,28 +36,19 @@
         let upPressed1 = false;
         let downPressed1 = false;
         let upPressed2 = false;
-        let downPressed2 = false;        
+        let downPressed2 = false;
 
-        document.getElementById("getStateBtn").addEventListener("click", () => {
-                if (intervalState === null)
-                    intervalState = setInterval( () => { 
-                        postPaddles(gameId, p1, p2);
-                        getState(gameId);
-                    }, 10);
-                else
-                {
-                    clearInterval(intervalState);
-                    intervalState = null;
-                } 
-            });        
-        
         function getState(gameId)
         {
             if (gameId === null)
                 return(status.textContent = "Game ID is missing, initialize a game first");
             fetch("http://localhost:3000/game/state?id=" + gameId, { method: 'GET' })
             .then(res => res.json())
-            .then(data => { draw(data); })
+            .then(data => {
+                draw(data);
+                // state.textContent = "x:" + data.ball.x + " y:" + data.ball.y + " / scoreP1:" + data.score.p1
+                //     + " scoreP2:" + data.score.p2 + " / pad1:" + data.paddle.p1 + " pad2:" + data.paddle.p2
+            })
             .catch(err => {
                 console.error(err);
                 status.textContent = "Error getting gameState";
@@ -96,18 +83,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: gameId, p1: p1, p2: p2 })
-            })
-            // .then(res => res.json())
-            // // .then(data => {                        
-            // //     if (data.success)
-            // //         status.textContent = "Paddles updated";
-            // //     else                            
-            // //         status.textContent = "Paddles not updated";
-            // // })
-            // .catch(err => {
-            //     console.error(err);
-            //     status.textContent = "Error posting paddles";
-            // });
+            })            
         }
         
         function postStart()
@@ -119,7 +95,19 @@
                 body: JSON.stringify({ id: gameId, startGame: startGame })
             })
             .then(res => res.json())
-            .then(data => { status.textContent = data.message; })
+            .then(data => { 
+                status.textContent = data.message;
+                if (intervalState === null && startGame)
+                    intervalState = setInterval( () => { 
+                        postPaddles(gameId, p1, p2);
+                        getState(gameId);
+                    }, 10);
+                else if (!startGame)
+                {
+                    clearInterval(intervalState);
+                    intervalState = null;                    
+                }
+            })
             .catch(err => {
                 console.error(err);
                 status.textContent = "Error starting/pausing game";
@@ -135,7 +123,9 @@
                 ballRadius = data.bR * canvas.height;
                 paddleHeight = data.pH * canvas.height;
                 paddleWidth = data.pW * canvas.height;
-                status.textContent = "Pong Game id: " + gameId + " started";
+                status.textContent = "Pong Game id: " + gameId + " initialized";
+                startGame = false;
+                endOfGame = false;
             })
             .catch(err => {
                 console.error(err);
@@ -143,7 +133,7 @@
             });
         }
 
-        function hello()
+        function getHello()
         {
             fetch("http://localhost:3000/hello", { method: 'GET' })
             .then(res => res.json())
@@ -277,14 +267,19 @@
 </body>
 </html>
 
-
-<!-- function drawBall(data)
-{            
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "red";
-    const ballX = data.ball.x * canvas.width;
-    const ballY = data.ball.y * canvas.height;
-    ctx.beginPath();
-    ctx.arc(ballX, ballY, 10, 0, 2 * Math.PI);
-    ctx.fill();
-} -->
+<!-- <button id="getStateBtn">State</button> -->
+<!-- <script>
+// let endOfGame = false;       
+// document.getElementById("getStateBtn").addEventListener("click", () => {
+//         if (intervalState === null && endOfGame === false)
+//             intervalState = setInterval( () => { 
+//                 postPaddles(gameId, p1, p2);
+//                 getState(gameId);
+//             }, 10);
+//         else if (endOfGame === true)
+//         {
+//             clearInterval(intervalState);
+//             intervalState = null;                    
+//         } 
+//     });
+</script> -->
