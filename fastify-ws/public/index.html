@@ -12,8 +12,7 @@
     <h1>API Test - Pong Game UI</h1>    
     <button onclick="getHello()">Hello</button>
     <button onclick="postInit()">Init</button>
-    <button onclick="postStart()">Start/Pause</button>
-    
+    <button onclick="postStart(gameId)">Start/Pause</button>    
     <button onclick="getState(gameId)">State</button>
     <button onclick="getWinner(gameId)">Winner</button>
     <p id="status">(status)</p>    
@@ -86,8 +85,10 @@
             })            
         }
         
-        function postStart()
+        function postStart(gameId)
         {           
+            if (gameId === null)
+               return (status.textContent = "Game ID is missing, initialize a game first");
             startGame = !startGame;
             fetch("http://localhost:3000/game/start", {
                 method: 'POST',
