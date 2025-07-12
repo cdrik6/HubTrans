@@ -98,16 +98,26 @@
             .then(res => res.json())
             .then(data => { 
                 status.textContent = data.message;
-                if (intervalState === null && startGame)
-                    intervalState = setInterval( () => { 
-                        postPaddles(gameId, p1, p2);
-                        getState(gameId);
-                    }, 10);
-                else if (!startGame)
+                if (data.message === "Game Over")
                 {
                     clearInterval(intervalState);
-                    intervalState = null;                    
+                    intervalState = null;       
+                    gameId = null;
                 }
+                else
+                {
+                    if (intervalState === null && startGame)
+                        intervalState = setInterval( () => { 
+                            postPaddles(gameId, p1, p2);
+                            getState(gameId);
+                        }, 10);
+                    else if (!startGame)
+                    {
+                        clearInterval(intervalState);
+                        intervalState = null;                    
+                    }
+                }
+
             })
             .catch(err => {
                 console.error(err);
@@ -154,7 +164,7 @@
             ctx.fillStyle = "rgba(255, 0, 0, 1)";
             ctx.fill();	
             ctx.closePath();
-            console.log("x = " + x + " y = " + y);
+            // console.log("x = " + x + " y = " + y);
         }
 
         function drawPaddles(paddle1Y, paddle2Y)
@@ -165,7 +175,7 @@
             ctx.fillStyle = "#0095DD";
             ctx.fill();
             ctx.closePath();
-            console.log("P1 = " + paddle1Y + " " + (paddle1Y + paddleHeight) + " P2 = " + paddle2Y + " " + (paddle2Y + paddleHeight) );
+            // console.log("P1 = " + paddle1Y + " " + (paddle1Y + paddleHeight) + " P2 = " + paddle2Y + " " + (paddle2Y + paddleHeight) );
         }
 
         function printScore(s1, s2)
