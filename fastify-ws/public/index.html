@@ -12,18 +12,19 @@
     <h1>API Test - Pong Game UI</h1>    
     <button onclick="getHello()">Hello</button>
     <button onclick="postInit()">Init</button>
-    <button onclick="postStart(gameId)">Start/Pause</button>    
-    <button onclick="getState(gameId)">State</button>
-    <button onclick="getWinner(gameId)">Winner</button>
+    <button onclick="postStart()">Start/Pause</button>    
+    <button onclick="getState()">State</button>
+    <button onclick="getWinner()">Winner</button>
+    <button onclick="postDelete()">Delete</button>
     <p id="status">(status)</p>    
     <canvas id="gameCanvas" width="600" height="400"></canvas>    
-    <!-- <p id="stateGame">(stategame)</p>  -->
+    <p id="stateGame">(stategame)</p> 
 
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const status = document.getElementById("status");
-        // const state = document.getElementById("stateGame");
+        const state = document.getElementById("stateGame");
         let gameId = null;
         let startGame = false;
         let ballRadius = 10;
@@ -37,15 +38,46 @@
         let upPressed2 = false;
         let downPressed2 = false;
 
-        function getState(gameId)
+        function getHello()
         {
-            if (gameId === null)
-                return(status.textContent = "Game ID is missing, initialize a game first");
-            fetch("http://localhost:3000/game/state?id=" + gameId, { method: 'GET' })
+            fetch("http://localhost:3000/hello", { method: 'GET' })
+            .then(res => res.json())
+            .then(data => { status.textContent = data.message })
+            .catch(err => {
+                console.error(err);
+                status.textContent = "Error saying hello";
+            });
+        }
+
+        function postInit()
+        {
+            // if (gameId !== null)
+            //     postDelete();
+            fetch("http://localhost:3000/game/init", { method: 'POST' })
             .then(res => res.json())
             .then(data => {
-                draw(data);
-                // state.textContent = "x:" + data.ball.x + " y:" + data.ball.y + " / scoreP1:" + data.score.p1
+                gameId = data.id;
+                ballRadius = data.bR * canvas.height;
+                paddleHeight = data.pH * canvas.height;
+                paddleWidth = data.pW * canvas.height;
+                status.textContent = "Pong Game id: " + gameId + " initialized";
+                startGame = false;
+            })
+            .catch(err => {
+                console.error(err);
+                status.textContent = "Error initializing game";
+            });
+        }        
+
+        function getState()
+        {
+            // state.textContent += "la";
+            if (gameId === null)
+                return(status.textContent = "Game ID is missing, initialize a game first");            
+            fetch("http://localhost:3000/game/state?id=" + gameId, { method: 'GET' })
+            .then(res => res.json())
+            .then(data => { draw(data);                
+                // state.textContent = "x:" + data.ball.x + " y:" + data.ball.y + " / scoreP1:" + data.score.p1 
                 //     + " scoreP2:" + data.score.p2 + " / pad1:" + data.paddle.p1 + " pad2:" + data.paddle.p2
             })
             .catch(err => {
@@ -53,28 +85,8 @@
                 status.textContent = "Error getting gameState";
             });            
         }
-        
-        function getWinner(gameId)
-        {
-            if (gameId === null)
-                return(status.textContent = "Game ID is missing, initialize a game first");                               
-            fetch("http://localhost:3000/game/winner?id=" + gameId, { method: 'GET' })
-            .then(res => res.json())
-            .then(data => {
-                if (data.winner === "")
-                    status.textContent = "No Winner yet";
-                else if (data.winner === "p1")
-                    status.textContent = "Winner: Player1!";
-                else if (data.winner === "p2")
-                    status.textContent = "Winner: Player2!";
-            })
-            .catch(err => {
-                console.error(err);
-                status.textContent = "Error getting winner";
-            });
-        }
 
-        function postPaddles(gameId, p1, p2)
+        function postPaddles()
         {
             if (gameId === null)
                return (status.textContent = "Game ID is missing, initialize a game first");            
@@ -84,8 +96,8 @@
                 body: JSON.stringify({ id: gameId, p1: p1, p2: p2 })
             })            
         }
-        
-        function postStart(gameId)
+
+        function postStart()
         {           
             if (gameId === null)
                return (status.textContent = "Game ID is missing, initialize a game first");
@@ -97,19 +109,19 @@
             })
             .then(res => res.json())
             .then(data => { 
-                status.textContent = data.message;
-                if (data.message === "Game Over")
-                {
-                    clearInterval(intervalState);
-                    intervalState = null;       
-                    gameId = null;
-                }
-                else
+                state.textContent = data.message;
+                // if (data.message === "Game Over")
+                // {                    
+                //     gameId = null;
+                //     state.textContent = "ici " + gameId;
+                // }
+                if (data.message !== "Game Over")
                 {
                     if (intervalState === null && startGame)
                         intervalState = setInterval( () => { 
-                            postPaddles(gameId, p1, p2);
-                            getState(gameId);
+                            postPaddles();
+                            getState();
+                            getWinner();
                         }, 10);
                     else if (!startGame)
                     {
@@ -117,41 +129,60 @@
                         intervalState = null;                    
                     }
                 }
-
             })
             .catch(err => {
                 console.error(err);
                 status.textContent = "Error starting/pausing game";
             });            
         }
-
-        function postInit()
+        
+        function getWinner()
         {
-            fetch("http://localhost:3000/game/init", { method: 'POST' })
+            if (gameId === null)
+                return(status.textContent = "Game ID is missing, initialize a game first");                               
+            fetch("http://localhost:3000/game/winner?id=" + gameId, { method: 'GET' })
             .then(res => res.json())
             .then(data => {
-                gameId = data.id;
-                ballRadius = data.bR * canvas.height;
-                paddleHeight = data.pH * canvas.height;
-                paddleWidth = data.pW * canvas.height;
-                status.textContent = "Pong Game id: " + gameId + " initialized";
-                startGame = false;
-                endOfGame = false;
+                if (data.winner === "")
+                    status.textContent = "No Winner yet";
+                else
+                {
+                    // state.textContent = "Game Over";
+                    clearInterval(intervalState);                    
+                    intervalState = null;
+                    // gameId = null;
+                    if (data.winner === "p1")
+                        status.textContent = "Winner: Player1!";
+                    else if (data.winner === "p2")
+                        status.textContent = "Winner: Player2!";
+                    // postDelete();
+                }
             })
             .catch(err => {
                 console.error(err);
-                status.textContent = "Error initializing game";
+                status.textContent = "Error getting winner";
             });
-        }
+        }        
 
-        function getHello()
-        {
-            fetch("http://localhost:3000/hello", { method: 'GET' })
+        function postDelete()
+        {           
+            if (gameId === null)
+               return (status.textContent = "Game ID is missing, initialize a game first");            
+            fetch("http://localhost:3000/game/delete", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: gameId })                
+            })
             .then(res => res.json())
-            .then(data => { status.textContent = data.message })
+            .then(data => { 
+                state.textContent = data.message;
+                // clearInterval(intervalState);
+                // intervalState = null;
+                gameId = null;
+            })
             .catch(err => {
                 console.error(err);
-                status.textContent = "Error saying hello";
+                status.textContent = "Error starting/pausing game";
             });
         }
         
@@ -280,14 +311,14 @@
 
 <!-- <button id="getStateBtn">State</button> -->
 <!-- <script>
-// let endOfGame = false;       
+// let // endOfGame = false;       
 // document.getElementById("getStateBtn").addEventListener("click", () => {
-//         if (intervalState === null && endOfGame === false)
+//         if (intervalState === null && // endOfGame === false)
 //             intervalState = setInterval( () => { 
 //                 postPaddles(gameId, p1, p2);
 //                 getState(gameId);
 //             }, 10);
-//         else if (endOfGame === true)
+//         else if (// endOfGame === true)
 //         {
 //             clearInterval(intervalState);
 //             intervalState = null;                    

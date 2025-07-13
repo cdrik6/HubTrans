@@ -33,10 +33,10 @@ await fast.register(fastifyStatic, { root: path.join(dirname, 'public') });
 /*************************** Temp: Allow cross-origin requests *************************/
 /***************************************************************************************/
 
-// // API called from a web page running on a different origin (domain/port/protocol)
-// import fastifyCors from '@fastify/cors';
-// await fast.register(fastifyCors, { origin: '*' });
-// // need to be restricted to specific domains
+// API called from a web page running on a different origin (domain/port/protocol)
+import fastifyCors from '@fastify/cors';
+await fast.register(fastifyCors, { origin: '*' });
+// need to be restricted to specific domains
 
 /***************************************************************************************/
 /*************************** Routes from API *******************************************/
