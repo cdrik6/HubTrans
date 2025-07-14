@@ -37,7 +37,7 @@ export default async function pongRoutes(fast, options)
 			return (reply.code(400).send({ error: 'Invalid or missing Game ID' }));		
 		const game = apigamesById.get(Number(id));		
 		if (!game)
-			return (reply.code(404).send({ error: 'Game not found' }));		
+			return (reply.code(400).send({ error: 'Game not found' }));		
 		if (startGame && game.gameState.winner === "")
 		{
 			game.intervalId = setInterval( () => { game.play();	}, game.fq);
@@ -60,7 +60,7 @@ export default async function pongRoutes(fast, options)
 			return (reply.code(400).send({ error: 'Invalid or missing Game ID' }));	
 		const game = apigamesById.get(Number(id));
 		if (!game)			
-			return (reply.code(404).send({ error: 'Game not found' }));				
+			return (reply.code(400).send({ error: 'Game not found' }));				
 		game.paddlesY(p1, p2);		
 		reply.send({ success: true });
 	});	
@@ -72,7 +72,7 @@ export default async function pongRoutes(fast, options)
 			return (reply.code(400).send({ error: 'Invalid or missing Game ID' }));	
 		const game = apigamesById.get(Number(id));
 		if (!game)			
-			return (reply.code(404).send({ error: 'Game not found' }));
+			return (reply.code(400).send({ error: 'Game not found' }));
 		reply.send(game.gameState);
 	});
 
@@ -83,7 +83,7 @@ export default async function pongRoutes(fast, options)
 			return (reply.code(400).send({ error: 'Invalid or missing Game ID' }));	
 		const game = apigamesById.get(Number(id));
 		if (!game)			
-			return (reply.code(404).send({ error: 'Game not found' }));				
+			return (reply.code(400).send({ error: 'Game not found' }));				
 		reply.send({ winner: game.gameState.winner });
 	});
 	
@@ -93,7 +93,7 @@ export default async function pongRoutes(fast, options)
 			return (reply.code(400).send({ error: 'Invalid or missing Game ID' }));	
 		const game = apigamesById.get(Number(id));
 		if (!game)			
-			return (reply.code(404).send({ error: 'Game not found' }));
+			return (reply.code(400).send({ error: 'Game not found' }));
 		clearInterval(game.intervalId);
 		game.intervalId = null;
 		console.log("Game " + game.id + " deleted");
