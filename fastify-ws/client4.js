@@ -8,14 +8,21 @@ let upPressed1 = false;
 let downPressed1 = false;
 let upPressed2 = false;
 let downPressed2 = false;
-let paddle = {p1: "", p2: ""};
+let upPressed3 = false;
+let downPressed3 = false;
+let upPressed4 = false;
+let downPressed4 = false;
+let paddle = {p1: "", p2: "", p3: "", p4: ""};
 let start = {start: ""};
 let end = {end: ""};
-let mode = {nbPlayers: 2, userId: ""}; // --> catched just below
+let mode = {nbPlayers: 4, userId: ""}; // --> catched just below
 // Set mode
-const params = new URLSearchParams(window.location.search);
-// mode = {nbPlayers: parseInt(params.get("mode"), 10), userId: parseInt(params.get("userId"), 10)};
-mode = {nbPlayers: parseInt(params.get("mode"), 10), userId: ""};
+// const params = new URLSearchParams(window.location.search);
+// // mode = {nbPlayers: parseInt(params.get("mode"), 10), userId: parseInt(params.get("userId"), 10)};
+// mode = {nbPlayers: parseInt(params.get("mode"), 10), userId: ""};
+
+//***********************icii ******************* */
+
 
 // 
 const output = document.getElementById('output');

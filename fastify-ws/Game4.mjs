@@ -1,12 +1,12 @@
-export class Game {
+export class Game4 {
 
 	constructor(id)
 	{
 		this.id = id;
-		this.players = [null, null];
-		this.users = [null, null];
-		this.canvasHeight = 320;
-		this.canvasWidth = 480;
+		this.players = [null, null, null, null];
+		this.users = [null, null, null, null];
+		this.canvasHeight = 400;
+		this.canvasWidth = 400;
 		this.ballRadius = this.canvasHeight / 40;
 		this.paddleHeight = this.canvasHeight / 5;
 		this.paddleWidth = 3 * this.canvasHeight / 80;
@@ -17,21 +17,28 @@ export class Game {
 		this.dy = this.ballSpeed;
 		this.signX = getRandomSign();
 		this.signY = getRandomSign();
-		this.lost1 = false;
-		this.lost2 = false;
+		//
+		this.lost = false;		
+		//
 		this.paddle1Y = (this.canvasHeight - this.paddleHeight) / 2; 
 		this.paddle2Y = (this.canvasHeight - this.paddleHeight) / 2;
+		this.paddle3X = (this.canvasWidth - this.paddleHeight) / 2; 
+		this.paddle4X = (this.canvasWidth - this.paddleHeight) / 2;
+		//
 		this.padTouch1 = false;
 		this.padTouch2 = false;
+		//
 		this.corner = false;
 		this.x = this.canvasWidth / 2;
 		this.y = this.canvasHeight / 2;
 		this.s1 = 0;
 		this.s2 = 0;
+		this.s3 = 0;
+		this.s4 = 0;
 		this.gameState = {
 			ball: {x: this.x / this.canvasWidth, y: this.y / this.canvasHeight},
-			paddle: {p1: this.paddle1Y / this.canvasHeight, p2: this.paddle2Y / this.canvasHeight},
-			score: {p1: this.s1, p2: this.s2},
+			paddle: {p1: this.paddle1Y / this.canvasHeight, p2: this.paddle2Y / this.canvasHeight, p3: this.paddle3X / this.canvasWidth, p4: this.paddle4X / this.canvasWidth},
+			score: {p1: this.s1, p2: this.s2, p3: this.s3, p4: this.s4},
 			winner: ""
 		};
 		this.settings = {
@@ -44,52 +51,65 @@ export class Game {
 		this.ready = 0;
 		this.mode = 1;
 		this.limit = 5;
+		this.lastPaddle = "";
 	}
 
 	// get paddles movements from client
-	paddlesY(pad1, pad2)
+	paddlesY(pad1, pad2, pad3, pad4)
 	{
-		if (pad2 === "up" && this.paddle2Y > 0)
+		if (pad1 === "up" && this.paddle1Y > 0 )	
+			this.paddle1Y -= this.padSpeed;
+		else if (pad1 === "down" && this.paddle1Y + this.paddleHeight < this.canvasHeight)	
+			this.paddle1Y += this.padSpeed;
+		else if (pad2 === "up" && this.paddle2Y > 0)
 			this.paddle2Y -= this.padSpeed;
 		else if (pad2 === "down" && this.paddle2Y + this.paddleHeight < this.canvasHeight)		
 			this.paddle2Y += this.padSpeed;
-		else if (pad1 === "up" && this.paddle1Y > 0 )	
-			this.paddle1Y -= this.padSpeed;
-		else if (pad1 === "down" && this.paddle1Y + this.paddleHeight < this.canvasHeight)	
-			this.paddle1Y += this.padSpeed;	
-		this.gameState.paddle.p2 = this.paddle2Y / this.canvasHeight;
+		else if (pad3 === "left" && this.paddle3X > 0)
+			this.paddle3X -= this.padSpeed;
+		else if (pad3 === "right" && this.paddle3X + this.paddleHeight < this.canvasWidth)		
+			this.paddle3X += this.padSpeed;
+		else if (pad4 === "left" && this.paddle4X > 0)
+			this.paddle4X -= this.padSpeed;
+		else if (pad4 === "right" && this.paddle4X + this.paddleHeight < this.canvasWidth)
+			this.paddle4X += this.padSpeed;
 		this.gameState.paddle.p1 = this.paddle1Y / this.canvasHeight;
+		this.gameState.paddle.p2 = this.paddle2Y / this.canvasHeight;
+		this.gameState.paddle.p3 = this.paddle3X / this.canvasWidth;
+		this.gameState.paddle.p4 = this.paddle4X / this.canvasWidth;
 	}	
 	
 	
 	check()
 	{
-		if (this.x + this.ballRadius >= this.canvasWidth)
+		if (this.x + this.ballRadius >= this.canvasWidth || this.x - this.ballRadius <= 0 
+			|| this.y + this.ballRadius >= this.canvasHeight || this.y - this.ballRadius <= 0)
+			this.point(this.lastPaddle);
+		else if (this.distBallPad4(this.x, this.y) <= 0)		
 		{
-			this.lost2 = true;
-			this.s1++;
-			this.gameState.score.p1 = this.s1;			
-			if (this.s1 >= this.limit && this.s1 - this.s2 >= 2)
+			this.lastPaddle = "p4";			
+			if (this.padTouch4 === false)
 			{
-				this.gameState.winner = "p1";
-				clearInterval(this.intervalId);
-			}	
+				this.signY = -this.signY;
+				if (this.corner === true)
+					this.signX = -this.signX;
+				this.padTouch4 = true;						
+			}
 		}
-		else if (this.x - this.ballRadius <= 0)
+		else if (this.distBallPad3(this.x, this.y) <= 0)		
 		{
-			this.lost1 = true;
-			this.s2++;
-			this.gameState.score.p2 = this.s2;
-			if (this.s2 >= this.limit && this.s2 - this.s1 >= 2)
+			this.lastPaddle = "p3";
+			if (this.padTouch3 === false)
 			{
-				this.gameState.winner = "p2";
-				clearInterval(this.intervalId);
-			}	
-		}	
-		else if (this.y + this.ballRadius >= this.canvasHeight || this.y - this.ballRadius <= 0)
-			this.signY = -this.signY;						
+				this.signY = -this.signY;
+				if (this.corner === true)
+					this.signX = -this.signX;
+				this.padTouch3 = true;
+			}
+		}
 		else if (this.distBallPad2(this.x, this.y) <= 0)
 		{
+			this.lastPaddle = "p2";
 			// console.log("distBallPad2(" + this.id + ") <= 0, padTouch2 = " + this.padTouch2 + " " + d2);			
 			if (this.padTouch2 === false)
 			{
@@ -102,7 +122,7 @@ export class Game {
 		}		
 		else if (this.distBallPad1(this.x, this.y) <= 0)		
 		{
-			//  console.log("distBallPad1(" + this.id + ") <= 0, padTouch1 = " + this.padTouch1 + " " + d1);
+			this.lastPaddle = "p1";			
 			if (this.padTouch1 === false)
 			{
 				this.signX = -this.signX;
@@ -110,33 +130,39 @@ export class Game {
 					this.signY = -this.signY;
 				this.padTouch1 = true;						
 			}
-		}
+		}		
 	}
 	
 	next()
 	{
-		if (!this.lost1 && !this.lost2 && this.gameState.winner === "")
+		if (!this.lost && this.gameState.winner === "")
 		{
-			this.x = this.x + this.signX*this.dx;
-			this.y = this.y + this.signY*this.dy;		
+			this.x = this.x + this.signX * this.dx;
+			this.y = this.y + this.signY * this.dy;		
 			// reset padTouch crossing the middle
 			if (this.canvasWidth / 2 - this.ballRadius <= this.x && this.x <= this.canvasWidth / 2 + this.ballRadius)
 			{
-				this.padTouch2 = false;
 				this.padTouch1 = false;
+				this.padTouch2 = false;
+			}
+			if (this.canvasHeight / 2 - this.ballRadius <= this.y && this.y <= this.canvasHeight / 2 + this.ballRadius)
+			{
+				this.padTouch3 = false;
+				this.padTouch4 = false;
 			}	
 		}
 		else
 		{
 			this.x = this.canvasWidth / 2;
 			this.y = this.canvasHeight / 2;
-			this.lost1 = false;
-			this.lost2 = false;		
+			this.lost = false;			
 			this.signX = getRandomSign();
 			this.signY = getRandomSign();
-			this.padTouch2 = false;
 			this.padTouch1 = false;
-			//this.start(false);
+			this.padTouch2 = false;
+			this.padTouch3 = false;
+			this.padTouch4 = false;
+			this.lastPaddle = "";
 		}	
 	}
 
@@ -154,6 +180,32 @@ export class Game {
 			clearInterval(this.intervalId);		 
 		return (this.gameState);    		
 	}
+
+	distBallPad4(xB, yB)
+	{
+		const xP = this.paddle4X + this.paddleHeight;	
+		const yP = this.canvasHeight - this.paddleWidth;
+
+		if (xB >= this.paddle4X && xB <= xP)
+			return (this.corner = false, yP - (yB + this.ballRadius));	
+		if (xB > xP)
+			return (this.corner = true, Math.sqrt((xB - xP) * (xB - xP) + (yB - yP) * (yB - yP)) - this.ballRadius);
+		if (xB < this.paddle4X)
+			return (this.corner = true, Math.sqrt((yB - yP) * (yB - yP) + (xB - this.paddle4X) * (xB - this.paddle4X)) - this.ballRadius);
+	}
+
+	distBallPad3(xB, yB)
+	{
+		const xP = this.paddle3X + this.paddleHeight;	
+		const yP = this.paddleWidth;
+
+		if (xB >= this.paddle3X && xB <= xP)		
+			return (this.corner = false, (yB - this.ballRadius) - yP);	
+		if (xB > xP)
+			return (this.corner = true, Math.sqrt((xB - xP) * (xB - xP) + (yB - yP) * (yB - yP)) - this.ballRadius);
+		if (xB < this.paddle3X)
+			return (this.corner = true, Math.sqrt((yB - yP) * (yB - yP) + (xB - this.paddle3X) * (xB - this.paddle3X)) - this.ballRadius);
+	}	
 
 	distBallPad2(xB, yB)
 	{
@@ -181,7 +233,6 @@ export class Game {
 			return (this.corner = true, Math.sqrt((xB - xP) * (xB - xP) + (yB - this.paddle1Y) * (yB - this.paddle1Y)) - this.ballRadius);
 	}
 
-
 	start(startGame)
 	{
 		this.startGame = startGame;
@@ -206,6 +257,53 @@ export class Game {
 		}
 		else 
 			clearInterval(this.intervalId);
+	}
+
+	point(lastPaddle)
+	{
+		this.lost = true;
+		if (lastPaddle === "")
+			return ;
+		if (lastPaddle === "p1")
+		{
+			this.s1++;
+			this.gameState.score.p1 = this.s1;			
+			if (this.s1 >= this.limit)
+			{
+				this.gameState.winner = "p1";
+				clearInterval(this.intervalId);
+			}
+		}	
+		else if (lastPaddle === "p2")
+		{
+			this.s2++;			
+			this.gameState.score.p2 = this.s2;
+			if (this.s2 >= this.limit)
+			{
+				this.gameState.winner = "p2";
+				clearInterval(this.intervalId);
+			}
+		}
+		else if (lastPaddle === "p3")
+		{
+			this.s3++;
+			this.gameState.score.p3 = this.s3;
+			if (this.s3 >= this.limit)
+			{
+				this.gameState.winner = "p3";
+				clearInterval(this.intervalId);
+			}
+		}
+		else if (lastPaddle === "p4")
+		{
+			this.s4++;
+			this.gameState.score.p4 = this.s4;
+			if (this.s4 >= this.limit)
+			{
+				this.gameState.winner = "p4";
+				clearInterval(this.intervalId);
+			}
+		}
 	}
 	
 	// end()

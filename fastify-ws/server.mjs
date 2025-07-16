@@ -16,27 +16,28 @@ const gamesById = new Map();
 const gamesByClient = new Map();
 const gamesByUser = new Map();
 let id = 0;
+let localId = 0;
 
-/***************************************************************************************/
-/*************************** Temp: To serve index.html with fastify ********************/
-/***************************************************************************************/
+// /***************************************************************************************/
+// /*************************** Temp: To serve index.html with fastify ********************/
+// /***************************************************************************************/
 
-import path from 'path';
-import { fileURLToPath } from 'url';
-import fastifyStatic from '@fastify/static';
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
-// Register static plugin
-await fast.register(fastifyStatic, { root: path.join(dirname, 'public') });
+// import path from 'path';
+// import { fileURLToPath } from 'url';
+// import fastifyStatic from '@fastify/static';
+// const filename = fileURLToPath(import.meta.url);
+// const dirname = path.dirname(filename);
+// // Register static plugin
+// await fast.register(fastifyStatic, { root: path.join(dirname, 'public') });
 
-/***************************************************************************************/
-/*************************** Temp: Allow cross-origin requests *************************/
-/***************************************************************************************/
+// /***************************************************************************************/
+// /*************************** Temp: Allow cross-origin requests *************************/
+// /***************************************************************************************/
 
-// API called from a web page running on a different origin (domain/port/protocol)
-import fastifyCors from '@fastify/cors';
-await fast.register(fastifyCors, { origin: '*' });
-// need to be restricted to specific domains
+// // API called from a web page running on a different origin (domain/port/protocol)
+// import fastifyCors from '@fastify/cors';
+// await fast.register(fastifyCors, { origin: '*' });
+// // need to be restricted to specific domains
 
 /***************************************************************************************/
 /*************************** Routes from API *******************************************/
@@ -57,19 +58,21 @@ await fast.register(pongRoutes);
 /***************************************************************************************/
 
 // Both Fastify and WebSocket share the same port and server instance
-fast.ready().then(() => {     
-
-	const server = http.createServer((req, res) => {
+fast.ready().then(() => {     	
+	
+	const server = http.createServer((req, res) => {		
         fast.routing(req, res);
     });
     
     // bind websocketserver to the http server
     const srv_wskt = new WebSocketServer({ server, path:'/pong' });    
 
-    srv_wskt.on('connection', (clt_skt, res) => {
-		
+    srv_wskt.on('connection', (clt_skt, req) => {
+		// // const ip = req.socket.remoteAddress;
+		// ip = req.socket.remoteAddress;
+
 		clt_skt.on('open', () => {
-			console.log('Server: Client connected');		
+			console.log('Server: Client connected');			
 		});		
 		
 		clt_skt.on('error', () => {
@@ -82,7 +85,7 @@ fast.ready().then(() => {
             try
 			{					
 				if ('nbPlayers' in data && 'userId'in data)				
-					ModeInData(clt_skt, data);				
+					ModeInData(clt_skt, data);
 				else if ('p1' in data && 'p2' in data)				
 					PaddleInData(clt_skt, data);				
 				else if ('start' in data)									
@@ -111,52 +114,25 @@ fast.ready().then(() => {
 
     server.listen(3000, () => {
         console.log("Server listening");
-    });		
-
-	// // *** debug *** /
-	// // console.log(process._getActiveHandles());	
-	// const interServer = setInterval( () => 
-	// 	{
-	// 		console.log("opened socket in gamesById");
-	// 		for (const game of gamesById.values())
-	// 		{
-	// 			if (game.players[0] && game.players[0].readyState === WebSocket.OPEN)
-	// 				console.log(game.id + "\n");
-	// 			if (game.players[1] && game.players[1].readyState === WebSocket.OPEN)
-	// 				console.log(game.id + "\n");
-	// 		}
-	// 		console.log("opened socket in gamesByCient");
-	// 		for (const game of gamesByClient.values())
-	// 		{
-	// 			if (game.players[0] && game.players[0].readyState === WebSocket.OPEN)
-	// 				console.log(game.id + "\n");
-	// 			if (game.players[1] && game.players[1].readyState === WebSocket.OPEN)
-	// 				console.log(game.id + "\n");
-	// 		}
-	// 		console.log("opened socket in gamesByUser");
-	// 		for (const game of gamesByUser.values())
-	// 		{
-	// 			if (game.players[0] && game.players[0].readyState === WebSocket.OPEN)
-	// 				console.log(game.id + "\n");
-	// 			if (game.players[1] && game.players[1].readyState === WebSocket.OPEN)
-	// 				console.log(game.id + "\n");
-	// 		}				
-	// 	}, 5000);
-	
+    });	
 });
 
 //
 function ModeInData(clt_skt, data)
 {
+	
+	if (data.userId === "")
+	{
+		data.userId = "local_" + localId;
+		localId++;
+	}
 	console.log('nbPlayers:', data.nbPlayers);
 	console.log('userId:', data.userId);
-	
-	// **** if no data.userId (local non register case --> create an userId) to do ??? ****/
-	if ((data.nbPlayers === 1 ||  data.nbPlayers === 2) && data.userId !== null)
+	if ((data.nbPlayers === 1 || data.nbPlayers === 2) && data.userId !== null)
 	{
 		const temp = gamesByUser.get(data.userId)
 		if (temp)
-			BackToGame(clt_skt, data, temp);
+			BackToGame(clt_skt, data, temp);		
 		else
 		{
 			if (data.nbPlayers === 2)
