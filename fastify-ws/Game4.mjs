@@ -3,14 +3,14 @@ export class Game4 {
 	constructor(id)
 	{
 		this.id = id;
-		this.players = [null, null, null, null];
-		this.users = [null, null, null, null];
+		this.players = [null, null, null, null]; // skt1 / skt2 / skt3 / skt4
+		this.users = [null, null, null, null]; // p1 / p2 / p3 / p4
 		this.canvasHeight = 400;
 		this.canvasWidth = 400;
 		this.ballRadius = this.canvasHeight / 40;
 		this.paddleHeight = this.canvasHeight / 5;
 		this.paddleWidth = 3 * this.canvasHeight / 80;
-		this.ballSpeed = 3;
+		this.ballSpeed = 1;
 		this.padSpeed = 3;
 		this.fq = 10;
 		this.dx = this.ballSpeed;
@@ -48,14 +48,14 @@ export class Game4 {
 		};
 		this.intervalId = null;
 		this.startGame = false;
-		this.ready = 0;
-		this.mode = 1;
-		this.limit = 5;
+		this.ready = -3;
+		this.mode = 4;
+		this.limit = 11;
 		this.lastPaddle = "";
 	}
 
 	// get paddles movements from client
-	paddlesY(pad1, pad2, pad3, pad4)
+	paddlesY(pad1, pad2)
 	{
 		if (pad1 === "up" && this.paddle1Y > 0 )	
 			this.paddle1Y -= this.padSpeed;
@@ -64,17 +64,21 @@ export class Game4 {
 		else if (pad2 === "up" && this.paddle2Y > 0)
 			this.paddle2Y -= this.padSpeed;
 		else if (pad2 === "down" && this.paddle2Y + this.paddleHeight < this.canvasHeight)		
-			this.paddle2Y += this.padSpeed;
-		else if (pad3 === "left" && this.paddle3X > 0)
+			this.paddle2Y += this.padSpeed;		
+		this.gameState.paddle.p1 = this.paddle1Y / this.canvasHeight;
+		this.gameState.paddle.p2 = this.paddle2Y / this.canvasHeight;		
+	}	
+
+	paddlesX(pad3, pad4)
+	{
+		if (pad3 === "left" && this.paddle3X > 0)
 			this.paddle3X -= this.padSpeed;
 		else if (pad3 === "right" && this.paddle3X + this.paddleHeight < this.canvasWidth)		
 			this.paddle3X += this.padSpeed;
 		else if (pad4 === "left" && this.paddle4X > 0)
 			this.paddle4X -= this.padSpeed;
 		else if (pad4 === "right" && this.paddle4X + this.paddleHeight < this.canvasWidth)
-			this.paddle4X += this.padSpeed;
-		this.gameState.paddle.p1 = this.paddle1Y / this.canvasHeight;
-		this.gameState.paddle.p2 = this.paddle2Y / this.canvasHeight;
+			this.paddle4X += this.padSpeed;		
 		this.gameState.paddle.p3 = this.paddle3X / this.canvasWidth;
 		this.gameState.paddle.p4 = this.paddle4X / this.canvasWidth;
 	}	
@@ -239,9 +243,7 @@ export class Game4 {
 		if (this.startGame === true && this.ready === 1)
 		{			
 			this.intervalId = setInterval( () => 
-			{
-				// if (this.gameState.winner !== "")
-				// 	return;
+			{				
 				const frame = JSON.stringify(this.play());
 				if (this.mode === 2 && this.players[0].readyState === this.players[0].OPEN)
 						this.players[0].send(frame);
@@ -304,19 +306,7 @@ export class Game4 {
 				clearInterval(this.intervalId);
 			}
 		}
-	}
-	
-	// end()
-	// {
-    // 	if (this.intervalId)
-	// 	{
-    //     	clearInterval(this.intervalId);
-    //     	this.intervalId = null;
-    // 	}
-	// 	this.players = [null, null];
-	// 	this.users = [null, null];
-    // 	console.log(this.id + " is ended");
-	// }
+	}	
 }
 
 

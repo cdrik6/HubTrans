@@ -188,9 +188,7 @@ export class Game {
 		if (this.startGame === true && this.ready === 1)
 		{			
 			this.intervalId = setInterval( () => 
-			{
-				// if (this.gameState.winner !== "")
-				// 	return;
+			{				
 				const frame = JSON.stringify(this.play());
 				if (this.mode === 2 && this.players[0].readyState === this.players[0].OPEN)
 						this.players[0].send(frame);
@@ -208,17 +206,6 @@ export class Game {
 			clearInterval(this.intervalId);
 	}
 	
-	// end()
-	// {
-    // 	if (this.intervalId)
-	// 	{
-    //     	clearInterval(this.intervalId);
-    //     	this.intervalId = null;
-    // 	}
-	// 	this.players = [null, null];
-	// 	this.users = [null, null];
-    // 	console.log(this.id + " is ended");
-	// }
 }
 
 

@@ -72,54 +72,21 @@ document.addEventListener("keyup", keyUpHandler, false);
 
 function padMovement()
 {
-	if (upPressed2 === true && upPressed1 === true)
-  	{  	  
-      	paddle.p2 = "up";
-		paddle.p1 = "up";
-	  	clt_wskt.send(JSON.stringify(paddle));
-	}
-	else if (upPressed2 === true && upPressed1 === false)
-  	{  	  
-      	paddle.p2 = "up";
-		paddle.p1 = "";
-	  	clt_wskt.send(JSON.stringify(paddle));
-	}
-	else if (upPressed2 === false && upPressed1 === true)
-  	{  	  
-      	paddle.p2 = "";
-		paddle.p1 = "up";
-	  	clt_wskt.send(JSON.stringify(paddle));
-	}
-	else if (downPressed2 === true  && downPressed1 === true)
-  	{  	  
-      	paddle.p2 = "down";
-		paddle.p1 = "down";
-	  	clt_wskt.send(JSON.stringify(paddle));
-	}
-	else if (downPressed2 === true && downPressed1 === false)
-  	{  	  
-      	paddle.p2 = "down";
-		paddle.p1 = "";
-	  	clt_wskt.send(JSON.stringify(paddle));
-	}	
-	else if (downPressed2 === false && downPressed1 === true)
-  	{  	  
-      	paddle.p2 = "";
-		paddle.p1 = "down";
-	  	clt_wskt.send(JSON.stringify(paddle));
-	}	
-	else if (upPressed2 === true && downPressed1 === true)
-  	{  	  
-      	paddle.p2 = "up";
-		paddle.p1 = "down";
-	  	clt_wskt.send(JSON.stringify(paddle));
-	}
-	else if (downPressed2 === true && upPressed1 === true)
-  	{  	  
-      	paddle.p2 = "down";
-		paddle.p1 = "up";
-	  	clt_wskt.send(JSON.stringify(paddle));
-	}
+	if (upPressed2 === true)
+		paddle.p2 = "up";
+	else if (downPressed2 === true)
+		paddle.p2 = "down";
+	else
+      	paddle.p2 = "";	
+	if (upPressed1 === true)
+      	paddle.p1 = "up";
+	else if (downPressed1 === true)
+		  paddle.p1 = "down";
+	else
+      	paddle.p1 = "";
+	// if (downPressed2 !== false || downPressed1 !== false || upPressed2 !== false || upPressed1 !== false)		
+	if (paddle.p1 !== "" || paddle.p2 !== "")
+		clt_wskt.send(JSON.stringify(paddle));
 }
 
 function keyDownHandler(e)
