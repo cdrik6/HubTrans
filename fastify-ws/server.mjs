@@ -5,7 +5,7 @@
 import fastify from 'fastify';
 import { WebSocketServer } from 'ws';
 import http from 'http';
-const fast = fastify();
+const fast = fastify({ logger: true });
 
 /***************************************************************************************/
 /*************************** Game class and Maps    ************************************/
@@ -57,6 +57,14 @@ await fast.register(pongRoutes);
 /***************************************************************************************/
 /*************************** Server running ********************************************/
 /***************************************************************************************/
+
+// const listeners = ['SIGINT', 'SIGTERM'];
+// listeners.forEach((signal) => {
+//     process.on(signal, async () => {
+//         await fast.close();
+//         process.exit(0);
+//     });
+// });
 
 // Both Fastify and WebSocket share the same port and server instance
 fast.ready().then(() => {     	

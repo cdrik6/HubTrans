@@ -134,7 +134,8 @@ export class Game4 {
 					this.signY = -this.signY;
 				this.padTouch1 = true;						
 			}
-		}		
+		}
+		console.log("lastPaddle = " + this.lastPaddle);
 	}
 	
 	next()
