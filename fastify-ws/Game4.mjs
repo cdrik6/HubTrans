@@ -10,11 +10,11 @@ export class Game4 {
 		this.ballRadius = this.canvasHeight / 40;
 		this.paddleHeight = this.canvasHeight / 5;
 		this.paddleWidth = 3 * this.canvasHeight / 80;
-		this.ballSpeed = 1;
+		this.ballSpeed = 3;
 		this.padSpeed = 3;
 		this.fq = 10;
-		this.dx = this.ballSpeed;
-		this.dy = this.ballSpeed;
+		this.dx = this.ballSpeed / 2;
+		this.dy = this.ballSpeed / 2;
 		this.signX = getRandomSign();
 		this.signY = getRandomSign();
 		//
@@ -97,7 +97,12 @@ export class Game4 {
 				this.signY = -this.signY;
 				if (this.corner === true)
 					this.signX = -this.signX;
-				this.padTouch4 = true;						
+				this.padTouch4 = true;
+				this.dx = this.ballSpeed;
+				this.dy = this.ballSpeed;
+				this.padTouch1 = false;
+				this.padTouch2 = false;
+				this.padTouch3 = false;
 			}
 		}
 		else if (this.distBallPad3(this.x, this.y) <= 0)		
@@ -109,6 +114,11 @@ export class Game4 {
 				if (this.corner === true)
 					this.signX = -this.signX;
 				this.padTouch3 = true;
+				this.dx = this.ballSpeed;
+				this.dy = this.ballSpeed;
+				this.padTouch1 = false;
+				this.padTouch2 = false;
+				this.padTouch4 = false;
 			}
 		}
 		else if (this.distBallPad2(this.x, this.y) <= 0)
@@ -121,6 +131,11 @@ export class Game4 {
 				if (this.corner === true)
 					this.signY = -this.signY;			
 				this.padTouch2 = true;
+				this.dx = this.ballSpeed;
+				this.dy = this.ballSpeed;
+				this.padTouch1 = false;
+				this.padTouch3 = false;
+				this.padTouch4 = false;
 				// console.log("la padTouch2 = " + this.padTouch2);
 			}			
 		}		
@@ -132,7 +147,12 @@ export class Game4 {
 				this.signX = -this.signX;
 				if (this.corner === true)
 					this.signY = -this.signY;
-				this.padTouch1 = true;						
+				this.padTouch1 = true;
+				this.dx = this.ballSpeed;
+				this.dy = this.ballSpeed;
+				this.padTouch2 = false;
+				this.padTouch3 = false;
+				this.padTouch4 = false;
 			}
 		}
 		console.log("lastPaddle = " + this.lastPaddle);
@@ -144,17 +164,19 @@ export class Game4 {
 		{
 			this.x = this.x + this.signX * this.dx;
 			this.y = this.y + this.signY * this.dy;		
-			// reset padTouch crossing the middle
-			if (this.canvasWidth / 2 - this.ballRadius <= this.x && this.x <= this.canvasWidth / 2 + this.ballRadius)
-			{
-				this.padTouch1 = false;
-				this.padTouch2 = false;
-			}
-			if (this.canvasHeight / 2 - this.ballRadius <= this.y && this.y <= this.canvasHeight / 2 + this.ballRadius)
-			{
-				this.padTouch3 = false;
-				this.padTouch4 = false;
-			}	
+			// reset padTouch crossing the middle --> when touch another pad
+			// if (this.canvasWidth / 2 - this.ballRadius <= this.x && this.x <= this.canvasWidth / 2 + this.ballRadius)
+			// {
+			// 	this.padTouch1 = false;
+			// 	this.padTouch2 = false;
+			// }
+			// if (this.canvasHeight / 2 - this.ballRadius <= this.y && this.y <= this.canvasHeight / 2 + this.ballRadius)
+			// {
+			// 	this.padTouch3 = false;
+			// 	this.padTouch4 = false;
+			// }	
+			// reset padTouch crossing the middle 
+
 		}
 		else
 		{
@@ -168,6 +190,8 @@ export class Game4 {
 			this.padTouch3 = false;
 			this.padTouch4 = false;
 			this.lastPaddle = "";
+			this.dx = this.ballSpeed / 2;
+			this.dy = this.ballSpeed / 2;
 		}	
 	}
 

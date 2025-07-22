@@ -9,16 +9,15 @@ export class Game {
 		this.canvasWidth = 480;
 		this.ballRadius = this.canvasHeight / 40;
 		this.paddleHeight = this.canvasHeight / 5;
-		this.paddleWidth = 3 * this.canvasHeight / 80;
+		this.paddleWidth = 3 * this.canvasHeight / 80;		
 		this.ballSpeed = 3;
 		this.padSpeed = 3;
 		this.fq = 10;
-		this.dx = this.ballSpeed;
-		this.dy = this.ballSpeed;
+		this.dx = this.ballSpeed / 2;
+		this.dy = this.ballSpeed / 2;
 		this.signX = getRandomSign();
 		this.signY = getRandomSign();
-		this.lost1 = false;
-		this.lost2 = false;
+		this.lost = false;
 		this.paddle1Y = (this.canvasHeight - this.paddleHeight) / 2; 
 		this.paddle2Y = (this.canvasHeight - this.paddleHeight) / 2;
 		this.padTouch1 = false;
@@ -32,7 +31,8 @@ export class Game {
 			ball: {x: this.x / this.canvasWidth, y: this.y / this.canvasHeight},
 			paddle: {p1: this.paddle1Y / this.canvasHeight, p2: this.paddle2Y / this.canvasHeight},
 			score: {p1: this.s1, p2: this.s2},
-			winner: ""
+			winner: "",
+			pH: this.paddleHeight / this.canvasHeight
 		};
 		this.settings = {
 			bR: this.ballRadius / this.canvasHeight,
@@ -43,7 +43,7 @@ export class Game {
 		this.startGame = false;
 		this.ready = 0;
 		this.mode = 1;
-		this.limit = 5;
+		this.limit = 11;
 	}
 
 	// get paddles movements from client
@@ -66,9 +66,10 @@ export class Game {
 	{
 		if (this.x + this.ballRadius >= this.canvasWidth)
 		{
-			this.lost2 = true;
+			this.lost = true;
 			this.s1++;
 			this.gameState.score.p1 = this.s1;			
+
 			if (this.s1 >= this.limit && this.s1 - this.s2 >= 2)
 			{
 				this.gameState.winner = "p1";
@@ -77,7 +78,7 @@ export class Game {
 		}
 		else if (this.x - this.ballRadius <= 0)
 		{
-			this.lost1 = true;
+			this.lost = true;
 			this.s2++;
 			this.gameState.score.p2 = this.s2;
 			if (this.s2 >= this.limit && this.s2 - this.s1 >= 2)
@@ -97,7 +98,9 @@ export class Game {
 				if (this.corner === true)
 					this.signY = -this.signY;			
 				this.padTouch2 = true;
-				// console.log("la padTouch2 = " + this.padTouch2);
+				this.dx = this.ballSpeed * getRandom(0.5, 1.5);
+				this.dy = this.ballSpeed * getRandom(0.5, 1.5);
+				// console.log("balspeed = " + this.ballSpeed);
 			}			
 		}		
 		else if (this.distBallPad1(this.x, this.y) <= 0)		
@@ -108,14 +111,16 @@ export class Game {
 				this.signX = -this.signX;
 				if (this.corner === true)
 					this.signY = -this.signY;
-				this.padTouch1 = true;						
+				this.padTouch1 = true;
+				this.dx = this.ballSpeed * getRandom(0.5, 1.5);
+				this.dy = this.ballSpeed * getRandom(0.5, 1.5);
 			}
 		}
 	}
 	
 	next()
 	{
-		if (!this.lost1 && !this.lost2 && this.gameState.winner === "")
+		if (!this.lost && this.gameState.winner === "")
 		{
 			this.x = this.x + this.signX*this.dx;
 			this.y = this.y + this.signY*this.dy;		
@@ -130,13 +135,17 @@ export class Game {
 		{
 			this.x = this.canvasWidth / 2;
 			this.y = this.canvasHeight / 2;
-			this.lost1 = false;
-			this.lost2 = false;		
+			this.lost = false;			
 			this.signX = getRandomSign();
 			this.signY = getRandomSign();
 			this.padTouch2 = false;
 			this.padTouch1 = false;
-			//this.start(false);
+			this.dx = this.ballSpeed / 2;
+			this.dy = this.ballSpeed / 2;						
+			if (this.paddleHeight > 1 / 0.8)
+				this.paddleHeight = this.paddleHeight * 0.8;
+			this.gameState.pH = this.paddleHeight / this.canvasHeight;			
+			
 		}	
 	}
 
@@ -147,12 +156,12 @@ export class Game {
 			this.check();
 			this.next();
 			this.gameState.ball.x = this.x / this.canvasWidth;
-			this.gameState.ball.y = this.y / this.canvasHeight;	
-			// console.log(gameState);
+			this.gameState.ball.y = this.y / this.canvasHeight;			
+			// this.gameState.pH = this.paddleHeight / this.canvasHeight;			
 		}
 		else		
 			clearInterval(this.intervalId);		 
-		return (this.gameState);    		
+		return (this.gameState);
 	}
 
 	distBallPad2(xB, yB)
@@ -189,7 +198,7 @@ export class Game {
 		{			
 			this.intervalId = setInterval( () => 
 			{				
-				const frame = JSON.stringify(this.play());
+				const frame = JSON.stringify(this.play());				
 				if (this.mode === 2 && this.players[0].readyState === this.players[0].OPEN)
 						this.players[0].send(frame);
 				else
@@ -228,4 +237,9 @@ function getRandomSign()
 		return (1);
 	else 
 		return (-1);
+}
+
+function getRandom(min, max)
+{
+   return (Math.random() * (max - min) + min);   
 }

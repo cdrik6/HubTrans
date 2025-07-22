@@ -331,20 +331,57 @@ function PaddleInData(clt_skt, data)
 		else if (game.mode === 1)
 		{
 			if (game.players[0] === clt_skt)
-				game.paddlesY(data.p1, "");
+			{
+				// game.paddlesY(data.p1, "");
+				if (data.p1 != "")
+					game.paddlesY( data.p1, "");
+				else if (data.p2 != "")
+					game.paddlesY(data.p2, "");
+			}
 			else if (game.players[1] === clt_skt)
-				game.paddlesY("", data.p2);			
+			{
+				// game.paddlesY("", data.p2);
+				if (data.p2 != "")
+					game.paddlesY("", data.p2);
+				else if (data.p1 != "")
+					game.paddlesY("", data.p1);
+			}
 		}
 		else 
 		{
 			if (game.players[0] === clt_skt)
-				game.paddlesY(data.p1, "");
+			{
+				// game.paddlesY(data.p1, "");
+				if (data.p1 != "")
+					game.paddlesY( data.p1, "");
+				else if (data.p2 != "")
+					game.paddlesY(data.p2, "");
+			}	
 			else if (game.players[1] === clt_skt)
-				game.paddlesY("", data.p2);
+			{
+				// game.paddlesY("", data.p2);
+				if (data.p2 != "")
+					game.paddlesY("", data.p2);
+				else if (data.p1 != "")
+					game.paddlesY("", data.p1);
+			}
 			else if (game.players[2] === clt_skt)
-			 	game.paddlesX(data.p3, "");
+			{
+				// game.paddlesX(data.p3, "");
+				if (data.p3 != "")
+					game.paddlesX( data.p3, "");
+				else if (data.p4 != "")
+					game.paddlesX(data.p4, "");
+
+			}
 			else if (game.players[3] === clt_skt)
-				game.paddlesX("", data.p4);
+			{
+				// game.paddlesX("", data.p4);
+				if (data.p4 != "")
+					game.paddlesX("", data.p4);
+				else if (data.p3 != "")
+					game.paddlesX("", data.p3);
+			}
 		}
 	}
 }

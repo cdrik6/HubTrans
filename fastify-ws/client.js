@@ -42,10 +42,9 @@ clt_wskt.addEventListener('message', srv_msg => {
 	try
 	{
 		const data = JSON.parse(srv_msg.data);		
-		if ('ball' in data && 'paddle' in data  && 'x' in data.ball && 'y' in data.ball && 'p1' in data.paddle && 'p2' in data.paddle)
+		if ('ball' in data && 'paddle' in data && 'x' in data.ball && 'y' in data.ball && 'p1' in data.paddle && 'p2' in data.paddle)
 		{
-			draw(data);
-			// draw(data.ball.x, data.ball.y, data.paddle.p1, data.paddle.p2, data.score.p1, data.score.p2);
+			draw(data);			
 			if ('winner' in data && data.winner !== "")
 			{
 				output.textContent += 'Game over: ' + data.winner +' won!\n';				
@@ -148,7 +147,8 @@ function printScore(s1, s2)
 }
 
 function draw(data)
-{
+{	
+	paddleHeight = data.pH * canvas.height;
 	ctx.clearRect(0, 0, canvas.width, canvas.height);	
 	printScore(data.score.p1, data.score.p2);	
 	drawBall(data.ball.x * canvas.width, data.ball.y * canvas.height);	
