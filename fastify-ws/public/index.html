@@ -222,6 +222,7 @@
         
         function draw(data)
         {
+            paddleHeight = data.pH * canvas.height;
             ctx.clearRect(0, 0, canvas.width, canvas.height);	
             printScore(data.score.p1, data.score.p2);	
             drawBall(data.ball.x * canvas.width, data.ball.y * canvas.height);	
@@ -232,53 +233,69 @@
         document.addEventListener("keydown", keyDownHandler, false);
         document.addEventListener("keyup", keyUpHandler, false);
 
+        // function padMovement()
+        // {
+        //     if (upPressed2 === true && upPressed1 === true)
+        //     {  	  
+        //         p2 = "up";
+        //         p1 = "up";                
+        //     }
+        //     else if (upPressed2 === true && upPressed1 === false)
+        //     {  	  
+        //         p2 = "up";
+        //         p1 = "";                
+        //     }
+        //     else if (upPressed2 === false && upPressed1 === true)
+        //     {  	  
+        //         p2 = "";
+        //         p1 = "up";                
+        //     }
+        //     else if (downPressed2 === true  && downPressed1 === true)
+        //     {  	  
+        //         p2 = "down";
+        //         p1 = "down";                
+        //     }
+        //     else if (downPressed2 === true && downPressed1 === false)
+        //     {  	  
+        //         p2 = "down";
+        //         p1 = "";                
+        //     }	
+        //     else if (downPressed2 === false && downPressed1 === true)
+        //     {  	  
+        //         p2 = "";
+        //         p1 = "down";                
+        //     }	
+        //     else if (upPressed2 === true && downPressed1 === true)
+        //     {  	  
+        //         p2 = "up";
+        //         p1 = "down";                
+        //     }
+        //     else if (downPressed2 === true && upPressed1 === true)
+        //     {  	  
+        //         p2 = "down";
+        //         p1 = "up";                
+        //     }
+        //     else if (downPressed2 === false && upPressed1 === false)
+        //     {  	  
+        //         p2 = "";
+        //         p1 = "";
+        //     }
+        // }
+
         function padMovement()
         {
-            if (upPressed2 === true && upPressed1 === true)
-            {  	  
+            if (upPressed2 === true)
                 p2 = "up";
-                p1 = "up";                
-            }
-            else if (upPressed2 === true && upPressed1 === false)
-            {  	  
-                p2 = "up";
-                p1 = "";                
-            }
-            else if (upPressed2 === false && upPressed1 === true)
-            {  	  
-                p2 = "";
-                p1 = "up";                
-            }
-            else if (downPressed2 === true  && downPressed1 === true)
-            {  	  
+            else if (downPressed2 === true)
                 p2 = "down";
-                p1 = "down";                
-            }
-            else if (downPressed2 === true && downPressed1 === false)
-            {  	  
-                p2 = "down";
-                p1 = "";                
-            }	
-            else if (downPressed2 === false && downPressed1 === true)
-            {  	  
-                p2 = "";
-                p1 = "down";                
-            }	
-            else if (upPressed2 === true && downPressed1 === true)
-            {  	  
-                p2 = "up";
-                p1 = "down";                
-            }
-            else if (downPressed2 === true && upPressed1 === true)
-            {  	  
-                p2 = "down";
-                p1 = "up";                
-            }
-            else if (downPressed2 === false && upPressed1 === false)
-            {  	  
-                p2 = "";
-                p1 = "";
-            }
+            else
+                p2 = "";	
+            if (upPressed1 === true)
+                p1 = "up";
+            else if (downPressed1 === true)
+                p1 = "down";
+            else
+                p1 = "";            
         }
 
         function keyDownHandler(e)

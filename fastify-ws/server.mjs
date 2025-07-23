@@ -23,22 +23,22 @@ let localId = 0;
 // /*************************** Temp: To serve index.html with fastify ********************/
 // /***************************************************************************************/
 
-// import path from 'path';
-// import { fileURLToPath } from 'url';
-// import fastifyStatic from '@fastify/static';
-// const filename = fileURLToPath(import.meta.url);
-// const dirname = path.dirname(filename);
-// // Register static plugin
-// await fast.register(fastifyStatic, { root: path.join(dirname, 'public') });
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fastifyStatic from '@fastify/static';
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
+// Register static plugin
+await fast.register(fastifyStatic, { root: path.join(dirname, 'public') });
 
 // /***************************************************************************************/
 // /*************************** Temp: Allow cross-origin requests *************************/
 // /***************************************************************************************/
 
-// // API called from a web page running on a different origin (domain/port/protocol)
-// import fastifyCors from '@fastify/cors';
-// await fast.register(fastifyCors, { origin: '*' });
-// // need to be restricted to specific domains
+// API called from a web page running on a different origin (domain/port/protocol)
+import fastifyCors from '@fastify/cors';
+await fast.register(fastifyCors, { origin: '*' });
+// need to be restricted to specific domains
 
 /***************************************************************************************/
 /*************************** Routes from API *******************************************/

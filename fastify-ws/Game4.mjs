@@ -54,31 +54,100 @@ export class Game4 {
 		this.lastPaddle = "";
 	}
 
-	// get paddles movements from client
+	// // get paddles movements from client
+	// paddlesY(pad1, pad2)
+	// {
+	// 	if (pad1 === "up" && this.paddle1Y > 0 )	
+	// 		this.paddle1Y -= this.padSpeed;
+	// 	else if (pad1 === "down" && this.paddle1Y + this.paddleHeight < this.canvasHeight)	
+	// 		this.paddle1Y += this.padSpeed;
+	// 	else if (pad2 === "up" && this.paddle2Y > 0)
+	// 		this.paddle2Y -= this.padSpeed;
+	// 	else if (pad2 === "down" && this.paddle2Y + this.paddleHeight < this.canvasHeight)		
+	// 		this.paddle2Y += this.padSpeed;		
+	// 	this.gameState.paddle.p1 = this.paddle1Y / this.canvasHeight;
+	// 	this.gameState.paddle.p2 = this.paddle2Y / this.canvasHeight;		
+	// }	
+
+	// paddlesX(pad3, pad4)
+	// {
+	// 	if (pad3 === "left" && this.paddle3X > 0)
+	// 		this.paddle3X -= this.padSpeed;
+	// 	else if (pad3 === "right" && this.paddle3X + this.paddleHeight < this.canvasWidth)		
+	// 		this.paddle3X += this.padSpeed;
+	// 	else if (pad4 === "left" && this.paddle4X > 0)
+	// 		this.paddle4X -= this.padSpeed;
+	// 	else if (pad4 === "right" && this.paddle4X + this.paddleHeight < this.canvasWidth)
+	// 		this.paddle4X += this.padSpeed;		
+	// 	this.gameState.paddle.p3 = this.paddle3X / this.canvasWidth;
+	// 	this.gameState.paddle.p4 = this.paddle4X / this.canvasWidth;
+	// }	
+
 	paddlesY(pad1, pad2)
 	{
-		if (pad1 === "up" && this.paddle1Y > 0 )	
-			this.paddle1Y -= this.padSpeed;
-		else if (pad1 === "down" && this.paddle1Y + this.paddleHeight < this.canvasHeight)	
-			this.paddle1Y += this.padSpeed;
-		else if (pad2 === "up" && this.paddle2Y > 0)
-			this.paddle2Y -= this.padSpeed;
-		else if (pad2 === "down" && this.paddle2Y + this.paddleHeight < this.canvasHeight)		
-			this.paddle2Y += this.padSpeed;		
+		if (pad2 === "up")
+		{
+			if(this.paddle2Y - this.padSpeed > 0)
+				this.paddle2Y -= this.padSpeed;
+			else 
+				this.paddle2Y = 0;
+		}				
+		else if (pad2 === "down")
+		{
+			if (this.paddle2Y + this.padSpeed + this.paddleHeight < this.canvasHeight)		
+				this.paddle2Y += this.padSpeed;
+			else 
+				this.paddle2Y = this.canvasHeight - this.paddleHeight;
+		}
+		else if (pad1 === "up")
+		{
+			if (this.paddle1Y - this.padSpeed > 0)	
+				this.paddle1Y -= this.padSpeed;
+			else 
+				this.paddle1Y = 0;
+
+		}
+		else if (pad1 === "down")
+		{
+			if (this.paddle1Y + this.padSpeed + this.paddleHeight < this.canvasHeight)		
+				this.paddle1Y += this.padSpeed;	
+			else
+				this.paddle1Y = this.canvasHeight - this.paddleHeight;
+		}
+		this.gameState.paddle.p2 = this.paddle2Y / this.canvasHeight;
 		this.gameState.paddle.p1 = this.paddle1Y / this.canvasHeight;
-		this.gameState.paddle.p2 = this.paddle2Y / this.canvasHeight;		
-	}	
+	}
 
 	paddlesX(pad3, pad4)
 	{
-		if (pad3 === "left" && this.paddle3X > 0)
-			this.paddle3X -= this.padSpeed;
-		else if (pad3 === "right" && this.paddle3X + this.paddleHeight < this.canvasWidth)		
-			this.paddle3X += this.padSpeed;
-		else if (pad4 === "left" && this.paddle4X > 0)
-			this.paddle4X -= this.padSpeed;
-		else if (pad4 === "right" && this.paddle4X + this.paddleHeight < this.canvasWidth)
-			this.paddle4X += this.padSpeed;		
+		if (pad3 === "left")
+		{	
+			if (this.paddle3X - this.padSpeed > 0)
+				this.paddle3X -= this.padSpeed;
+			else
+			 	this.paddle3X = 0;
+		}
+		else if (pad3 === "right")
+		{
+			if (this.paddle3X + this.padSpeed + this.paddleHeight < this.canvasWidth)
+				this.paddle3X += this.padSpeed;
+			else			
+				this.paddle3X = this.canvasWidth - this.paddleHeight;
+		}				
+		else if (pad4 === "left")
+		{	
+			if (this.paddle4X - this.padSpeed > 0)
+				this.paddle4X -= this.padSpeed;
+			else 
+				this.paddle4X = 0;
+		}	
+		else if (pad4 === "right")
+		{	
+			if (this.paddle4X + this.padSpeed + this.paddleHeight < this.canvasWidth)
+				this.paddle4X += this.padSpeed;
+			else
+				this.paddle4X = this.canvasWidth - this.paddleHeight;
+		}	
 		this.gameState.paddle.p3 = this.paddle3X / this.canvasWidth;
 		this.gameState.paddle.p4 = this.paddle4X / this.canvasWidth;
 	}	
