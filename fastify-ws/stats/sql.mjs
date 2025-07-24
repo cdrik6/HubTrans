@@ -8,9 +8,37 @@
 // 		}));
 // }
 
-export async function execute(db, sql)
+// export async function execute(db, sql)
+// {
+// 	return (new Promise( function(resolve, reject)
+//     {
+//         db.exec(sql, function(error)
+//         {
+//             if (error)
+//                 reject(error);
+//             else
+//                 resolve();
+//         });
+//     }));
+// }
+
+export async function execute(db, sql, params = [])
 {
-	return (new Promise( function(resolve, reject)
+	if (params && params.length > 0)
+    {
+        return (new Promise(function(resolve, reject)
+        {
+            db.run(sql, params, function(error)
+            {
+                if (error)
+                    reject(error);
+                else
+                    resolve();
+            });
+        }));
+    }    
+    
+    return (new Promise(function(resolve, reject)
     {
         db.exec(sql, function(error)
         {

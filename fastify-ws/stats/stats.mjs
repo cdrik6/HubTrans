@@ -1,30 +1,15 @@
 import fastify from 'fastify';
 import sqlite3 from 'sqlite3';
 import { execute } from './sql.mjs';
-
 const fast = fastify({ logger: true });
 const PORT = 3000;
 const HOST = '0.0.0.0';
-// const signals = ['SIGINT', 'SIGTERM'];
 
-const db = new sqlite3.Database('stats.db');
-// default sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
+import statsRoutes from './statsAPI.mjs';
+// For the API, ensures routes are registered before the server is ready
+await fast.register(statsRoutes);
 
-// signals.forEach((signal) => {
-//     process.on(signal, async () =>
-// 	{
-//     	try {
-//             await fast.close();
-//             // await closeDb(db);
-//             // console.log("Stats DB and Server closed")
-//             process.exit(0);
-//         }
-// 		catch (err) {
-//             console.error("Error closing users: ", err);
-//         }
-//     });
-// });
-
+const db = new sqlite3.Database('stats.db'); // default sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
 
 async function set_db()
 {
@@ -32,25 +17,25 @@ async function set_db()
         await execute(db, `CREATE TABLE IF NOT EXISTS game
                     (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        gameid INTEGER NOT NULL,
+                        gameid INTEGER NOT NULL UNIQUE,
                         player1 TEXT NOT NULL,
                         player2 TEXT NOT NULL,
                         winner TEXT NOT NULL,
                         score1 INTEGER NOT NULL,
-                        score2 INTEGER NOT NULL
+                        score2 INTEGER NOT NULL,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                     )`          
         );
         console.log("Table game created (if not exists)")
     }
     catch (err) {
         console.log(err);
-    }
-    finally {
-        db.close();
-    }
+    }    
 }
 
 set_db();
+
+export { db };
 
 async function listening()
 {
@@ -63,5 +48,4 @@ async function listening()
     	process.exit(1); 
   	}
 }
-
 listening();

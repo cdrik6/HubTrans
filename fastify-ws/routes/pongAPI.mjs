@@ -1,7 +1,7 @@
 // API for pong game
 // curl "http://localhost:3000/hello"
 
-import { Game } from '../Game.mjs'
+import { Game } from '../game/Game.mjs'
 const apigamesById = new Map();
 let apiId = 0;
 

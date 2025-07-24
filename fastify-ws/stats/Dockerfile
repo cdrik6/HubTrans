@@ -8,7 +8,5 @@ RUN npm install
 
 COPY . .
 
-# CMD ["node", "server.mjs"]
-CMD ["tail", "-f", "/dev/null"]
-# ENTRYPOINT ["bash", "/tmp/init_db.sh"]
-# # execute MariaDB initialization script
+CMD ["node", "stats.mjs"]
+# CMD ["tail", "-f", "/dev/null"]
