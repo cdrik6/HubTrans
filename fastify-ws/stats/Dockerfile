@@ -1,12 +1,11 @@
 FROM node:24-alpine
 
-WORKDIR /app
+WORKDIR /app/
 
 COPY package*.json ./
 
 RUN npm install
 
-COPY . .
+COPY src/ src/
 
-CMD ["node", "stats.mjs"]
-# CMD ["tail", "-f", "/dev/null"]
+CMD ["node", "src/stats.mjs"]

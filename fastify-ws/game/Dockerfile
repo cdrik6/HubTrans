@@ -1,18 +1,12 @@
 FROM node:24-alpine
 
-WORKDIR /app
+WORKDIR /app/
 
 COPY package*.json ./
 
 RUN npm install
 
-COPY . .
+COPY src/ src/
 
-CMD ["node", "server.mjs"]
+CMD ["node", "src/server.mjs"]
 # CMD ["tail", "-f", "/dev/null"]
-
-# FROM node:24-alpine
-# WORKDIR /app/
-# RUN npm i fastify ws http
-# COPY src/ src/
-# CMD ["node", "src/server.mjs"]
