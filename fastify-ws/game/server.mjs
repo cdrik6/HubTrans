@@ -30,7 +30,7 @@ import fastifyStatic from '@fastify/static';
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 // Register static plugin
-await fast.register(fastifyStatic, { root: path.join(dirname, '../public') });
+await fast.register(fastifyStatic, { root: path.join(dirname, './public') });
 
 // /***************************************************************************************/
 // /*************************** Temp: Allow cross-origin requests *************************/
@@ -45,7 +45,7 @@ await fast.register(fastifyCors, { origin: '*' });
 /*************************** Routes from API *******************************************/
 /***************************************************************************************/
 
-import pongRoutes from '../routes/pongAPI.mjs';
+import pongRoutes from './routes/pongAPI.mjs';
 
 // // API client gets its own "game"
 // const apiGame = new Game();
