@@ -1,3 +1,5 @@
+// import { getCurrentUser } from '../utils/auth.js';
+
 /************* variables for pong **************************/
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
@@ -15,19 +17,21 @@ let rightPressed4 = false;
 let paddle = {p1: "", p2: "", p3: "", p4: ""};
 let start = {start: ""};
 let end = {end: ""};
-let mode = {nbPlayers: 4, userId: ""}; // --> catched just below
-// Set mode
-// const params = new URLSearchParams(window.location.search);
-// // mode = {nbPlayers: parseInt(params.get("mode"), 10), userId: parseInt(params.get("userId"), 10)};
-// mode = {nbPlayers: parseInt(params.get("mode"), 10), userId: ""};
+let mode = { nbPlayers: 4, userId: "", speedy: false, paddy: false, wally: true, mirry: false };
+
+// const loggedUser = await getCurrentUser();
+// if (loggedUser)	
+// 	mode = { nbPlayers: 4, userId: loggedUser.username, speedy: false, paddy: false, wally: true, mirry: false };
+// else	
+// 	mode = { nbPlayers: 2, userId: "", speedy: false, paddy: false, wally: false, mirry: false };
 
 // 
 const output = document.getElementById('output');
 output.textContent += 'Press space to start\n\n';
 
-
 /**************************** ws  *****************************/
 const clt_wskt = new WebSocket('ws://localhost:3000/pong');
+// const clt_wskt = new WebSocket(`${location.origin}/api/game/pong`);
 
 clt_wskt.addEventListener('open', () => {	
 	output.textContent += 'Connected to WebSocket\n';
@@ -153,11 +157,11 @@ function keyUpHandler(e)
 function drawBall(x, y)
 {	
 	ctx.beginPath();		
-	ctx.arc(x , y, ballRadius, 0, 2 * Math.PI);
-	ctx.fillStyle = "rgba(255, 0, 0, 1)";
+	ctx.arc(x , y, ballRadius, 0, 2 * Math.PI);	
+	ctx.fillStyle = "rgba(0, 0, 0, 1)";
 	ctx.fill();	
 	ctx.closePath();
-	console.log("x = " + x + " y = " + y);
+	// console.log("x = " + x + " y = " + y);
 }
 
 function drawPaddles(paddle1Y, paddle2Y, paddle3X, paddle4X)
@@ -166,11 +170,10 @@ function drawPaddles(paddle1Y, paddle2Y, paddle3X, paddle4X)
 	ctx.rect(0, paddle1Y, paddleWidth, paddleHeight);
 	ctx.rect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);
 	ctx.rect(paddle3X, 0, paddleHeight, paddleWidth);
-	ctx.rect(paddle4X, canvas.height - paddleWidth, paddleHeight, paddleWidth);
-	ctx.fillStyle = "#0095DD";
+	ctx.rect(paddle4X, canvas.height - paddleWidth, paddleHeight, paddleWidth);	
+	ctx.fillStyle = "rgba(0, 0, 0, 1)";
 	ctx.fill();
-	ctx.closePath();
-	// console.log("P1 = " + paddle1Y + " " + (paddle1Y + paddleHeight) + " P2 = " + paddle2Y + " " + (paddle2Y + paddleHeight) );
+	ctx.closePath();	
 }
 
 function printScore(s1, s2, s3, s4)
@@ -186,12 +189,48 @@ function printScore(s1, s2, s3, s4)
 	score.textContent = "P1: " + s1 + " - P2: " + s2 + " - P3: " + s3 + " - P4: " + s4; 
 }
 
+function drawWall()
+{	
+	ctx.beginPath();		
+	ctx.rect(canvas.width/2 - paddleWidth/2, 0, paddleWidth, canvas.height);
+	ctx.rect(0, canvas.height/2 - paddleWidth/2, canvas.width, paddleWidth);
+	ctx.fillStyle = "rgba(0, 0, 0, 1)";
+	ctx.fill();	
+	ctx.closePath();	
+}
+
+function drawlines(paddle1Y, paddle2Y, paddle3X, paddle4X)
+{
+	ctx.beginPath();
+	ctx.rect(0, paddle1Y, canvas.width, 1);
+	ctx.rect(0, paddle2Y, canvas.width, 1);
+	ctx.rect(0, paddle1Y + paddleHeight, canvas.width, 1);	
+	ctx.rect(0, paddle2Y + paddleHeight, canvas.width, 1);
+	ctx.rect(paddle3X, 0, 1, canvas.height);
+	ctx.rect(paddle4X, 0, 1, canvas.height);
+	ctx.rect(paddle3X + paddleHeight, 0, 1, canvas.height);
+	ctx.rect(paddle4X + paddleHeight, 0, 1, canvas.height);
+	ctx.fillStyle = "rgba(0, 0, 0, 1)";
+	ctx.fill();
+	ctx.closePath();	
+}
+
+
 function draw(data)
 {
+	paddleHeight = data.pH * canvas.height;
 	ctx.clearRect(0, 0, canvas.width, canvas.height);	
-	printScore(data.score.p1, data.score.p2, data.score.p3, data.score.p4);	
-	drawBall(data.ball.x * canvas.width, data.ball.y * canvas.height);	
+	printScore(data.score.p1, data.score.p2, data.score.p3, data.score.p4);		
+	if (!mode.mirry)
+		drawBall(data.ball.x * canvas.width, data.ball.y * canvas.height);	
+	else
+	{
+		drawBall((1 - data.ball.x) * canvas.width, data.ball.y * canvas.height);	
+		drawlines(data.paddle.p1 * canvas.height, data.paddle.p2 * canvas.height, data.paddle.p3 * canvas.width, data.paddle.p4 * canvas.width);
+	}	
 	drawPaddles(data.paddle.p1 * canvas.height, data.paddle.p2 * canvas.height, data.paddle.p3 * canvas.width, data.paddle.p4 * canvas.width);
+	if (mode.wally === true && data.wall === 1)
+		drawWall();
 	padMovement();
 }
 

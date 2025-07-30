@@ -20,9 +20,9 @@ const gamesByUser = new Map();
 let id = 0;
 let localId = 0;
 
-// /***************************************************************************************/
-// /*************************** Temp: To serve index.html with fastify ********************/
-// /***************************************************************************************/
+/***************************************************************************************/
+/*************************** Temp: To serve index.html with fastify ********************/
+/***************************************************************************************/
 
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -32,9 +32,9 @@ const dirname = path.dirname(filename);
 // Register static plugin
 await fast.register(fastifyStatic, { root: path.join(dirname, './public') });
 
-// /***************************************************************************************/
-// /*************************** Temp: Allow cross-origin requests *************************/
-// /***************************************************************************************/
+/***************************************************************************************/
+/*************************** Temp: Allow cross-origin requests *************************/
+/***************************************************************************************/
 
 // API called from a web page running on a different origin (domain/port/protocol)
 import fastifyCors from '@fastify/cors';
@@ -89,7 +89,7 @@ fast.ready().then(() => {
             try
 			{					
 				if ('nbPlayers' in data && 'userId'in data)				
-					ModeInData(clt_skt, data);
+					ModeInData(clt_skt, data);				
 				else if ('p1' in data && 'p2' in data)				
 					PaddleInData(clt_skt, data);				
 				else if ('start' in data)									
@@ -163,6 +163,9 @@ function ModeLocal(clt_skt, data)
 	game.users[1] = data.userId;
 	game.ready = 1;
 	game.mode = 2;
+	game.speedy = data.speedy;
+	game.paddy = data.paddy;
+	game.wally = data.wally;
 	clt_skt.send(JSON.stringify(game.settings))
 	console.log(game.settings);
 }
@@ -290,6 +293,9 @@ function NewGame(clt_skt, data)
 	game.users[0] = data.userId;
 	game.ready = 0;
 	game.mode = 1;
+	game.speedy = data.speedy;
+	game.paddy = data.paddy;
+	game.wally = data.wally;
 	id++;
 	clt_skt.send(JSON.stringify(game.settings))
 	console.log(game.settings);
@@ -306,6 +312,9 @@ function NewGame4(clt_skt, data)
 	game.users[0] = data.userId;
 	game.ready = -2;
 	game.mode = 4;
+	game.speedy = data.speedy;
+	game.paddy = data.paddy;
+	game.wally = data.wally;
 	id++;
 	clt_skt.send(JSON.stringify(game.settings))
 	console.log(game.settings);
@@ -384,7 +393,8 @@ function PaddleInData(clt_skt, data)
 function StartInData(clt_skt)
 {
 	const game = gamesByClient.get(clt_skt);					
-	console.log("game id start/pause: " + game.id);
+	if (game)
+		console.log("game id start/pause: " + game.id);
 	if (game && game.ready === 1)
 	{
 		if (game.startGame === true)
@@ -397,12 +407,35 @@ function StartInData(clt_skt)
 function EndInData(clt_skt)
 {
 	const game = gamesByClient.get(clt_skt);					
-	console.log("game id end: " + game.id);
 	if (game)
 	{
+		console.log("game id end: " + game.id);	
+		console.log("winner: " + game.winner);
+		console.log("max: " + game.maxTouch);	
+		//
+		if (game.mode === 1)
+		{	
+			fetch("http://stats:443/stats", {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						gameid: game.id,
+						player1: game.users[0],
+						player2: game.users[1],
+						winner: game.winner,
+						score1: game.s1,
+						score2: game.s2,
+						max: game.maxTouch
+					})
+			})		
+			.then(res => { return (res.json()); })
+			.then(data => { console.log(data); })
+			.catch(err => { console.error(err); });
+		}
+		//
 		if (game.mode === 2)
 			game.players[0].close(1000, "Game over");
-		else if (game.mode === 2)
+		else if (game.mode === 1)
 		{
 			game.players[0].close(1000, "P1 Game over");
 			game.players[1].close(1000, "P2 Game over");	

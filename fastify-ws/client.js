@@ -1,5 +1,7 @@
+import { getCurrentUser } from '../utils/auth.js';
+
 /************* variables for pong **************************/
-let canvas = document.getElementById("canvas");
+let canvas = document.getElementById("canvasGame");
 let ctx = canvas.getContext("2d");
 let ballRadius = 10; // default
 let paddleHeight = 80; // default
@@ -8,26 +10,28 @@ let upPressed1 = false;
 let downPressed1 = false;
 let upPressed2 = false;
 let downPressed2 = false;
-let paddle = {p1: "", p2: ""};
-let start = {start: ""};
-let end = {end: ""};
-let mode = {nbPlayers: 2, userId: ""}; // --> catched just below
-// Set mode
-const params = new URLSearchParams(window.location.search);
-// mode = {nbPlayers: parseInt(params.get("mode"), 10), userId: parseInt(params.get("userId"), 10)};
-mode = {nbPlayers: parseInt(params.get("mode"), 10), userId: ""};
+let paddle = { p1: "", p2: "" };
+let start = { start: "" };
+let end = { end: "" };
+let mode = { nbPlayers: 2, userId: "", speedy: false, paddy: false, wally: false, mirry: false }; // --> catched just below
+
+const loggedUser = await getCurrentUser();
+if (loggedUser)
+	mode = { nbPlayers: 1, userId: loggedUser.username, speedy: false, paddy: false, wally: false, mirry: false };
+else
+	mode = { nbPlayers: 2, userId: "", speedy: false, paddy: false, wally: false, mirry: false };
 
 // 
 const output = document.getElementById('output');
 output.textContent += 'Press space to start\n\n';
 
-
 /**************************** ws  *****************************/
-const clt_wskt = new WebSocket('ws://localhost:3000/pong');
+// const clt_wskt = new WebSocket('ws://localhost:3000/pong');
+const clt_wskt = new WebSocket(`${location.origin}/api/game/pong`);
 
 clt_wskt.addEventListener('open', () => {	
 	output.textContent += 'Connected to WebSocket\n';
-	clt_wskt.send(JSON.stringify(mode));
+	clt_wskt.send(JSON.stringify(mode));	
 });
 
 clt_wskt.addEventListener('error', err => {
@@ -56,9 +60,9 @@ clt_wskt.addEventListener('message', srv_msg => {
 			ballRadius = data.bR * canvas.height;
 			paddleHeight = data.pH * canvas.height;
 			paddleWidth = data.pW * canvas.height;
-			output.textContent += ballRadius + '\n';
-			output.textContent += paddleHeight + '\n';
-			output.textContent += paddleWidth + '\n';
+			// output.textContent += ballRadius + '\n';
+			// output.textContent += paddleHeight + '\n';
+			// output.textContent += paddleWidth + '\n';
 		}		
 	}
 	catch (e) {
@@ -118,10 +122,11 @@ function drawBall(x, y)
 {	
 	ctx.beginPath();		
 	ctx.arc(x , y, ballRadius, 0, 2 * Math.PI);
-	ctx.fillStyle = "rgba(255, 0, 0, 1)";
+	// ctx.fillStyle = "rgba(255, 0, 0, 1)";
+	ctx.fillStyle = "rgba(0, 0, 0, 1)";
 	ctx.fill();	
 	ctx.closePath();
-	console.log("x = " + x + " y = " + y);
+	// console.log("x = " + x + " y = " + y);
 }
 
 function drawPaddles(paddle1Y, paddle2Y)
@@ -129,30 +134,62 @@ function drawPaddles(paddle1Y, paddle2Y)
 	ctx.beginPath();
 	ctx.rect(0, paddle1Y, paddleWidth, paddleHeight);
 	ctx.rect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);
-	ctx.fillStyle = "#0095DD";
+	// ctx.fillStyle = "#0095DD";
+	ctx.fillStyle = "rgba(0, 0, 0, 1)";
 	ctx.fill();
 	ctx.closePath();
-	console.log("P1 = " + paddle1Y + " " + (paddle1Y + paddleHeight) + " P2 = " + paddle2Y + " " + (paddle2Y + paddleHeight) );
+	// console.log("P1 = " + paddle1Y + " " + (paddle1Y + paddleHeight) + " P2 = " + paddle2Y + " " + (paddle2Y + paddleHeight) );
 }
 
 function printScore(s1, s2)
 {
 	const text = " - "
 	ctx.font = "30px sans serif";
-	ctx.fillStyle = "rgba(0, 100, 0, 1)";
+	// ctx.fillStyle = "rgba(0, 100, 0, 1)";
+	ctx.fillStyle = "rgba(0, 0, 0, 1)";
 	let pos = canvas.width/2 - ctx.measureText(text).width/2;	
 	ctx.fillText(text, pos, 40);
 	ctx.fillText(s1, pos - ctx.measureText(s1).width, 40);
 	ctx.fillText(s2, pos + ctx.measureText(text).width, 40);
 }
 
+function drawWall()
+{	
+	ctx.beginPath();		
+	ctx.rect(canvas.width/2 - paddleWidth/2, 0, paddleWidth, canvas.height);
+	ctx.fillStyle = "rgba(0, 0, 0, 1)";
+	ctx.fill();	
+	ctx.closePath();	
+}
+
+function drawlines(paddle1Y, paddle2Y)
+{
+	ctx.beginPath();
+	ctx.rect(0, paddle1Y, canvas.width, 1);
+	ctx.rect(0, paddle2Y, canvas.width, 1);
+	ctx.rect(0, paddle1Y + paddleHeight, canvas.width, 1);
+	ctx.rect(0, paddle2Y + paddleHeight, canvas.width, 1);	
+	ctx.fillStyle = "rgba(0, 0, 0, 1)";
+	ctx.fill();
+	ctx.closePath();	
+}
+
 function draw(data)
 {	
 	paddleHeight = data.pH * canvas.height;
 	ctx.clearRect(0, 0, canvas.width, canvas.height);	
-	printScore(data.score.p1, data.score.p2);	
-	drawBall(data.ball.x * canvas.width, data.ball.y * canvas.height);	
+	printScore(data.score.p1, data.score.p2);
+	if (!mode.mirry)
+		drawBall(data.ball.x * canvas.width, data.ball.y * canvas.height);	
+	else
+	{
+		drawBall((1 - data.ball.x) * canvas.width, data.ball.y * canvas.height);	
+		drawlines(data.paddle.p1 * canvas.height, data.paddle.p2 * canvas.height);
+	}	
 	drawPaddles(data.paddle.p1 * canvas.height, data.paddle.p2 * canvas.height);
+	// console.log("wally = " + mode.wally + " wall = " + data.wall);
+	if (mode.wally === true && data.wall === 1)
+		drawWall();
 	padMovement();		
 }
 
