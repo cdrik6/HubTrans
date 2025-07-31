@@ -181,7 +181,8 @@ export class Game4 {
 				this.padTouch1 = false;
 				this.padTouch2 = false;
 				this.padTouch3 = false;
-				this.wallTouch = false;				
+				this.wallTouch = false;
+				this.set_wall();
 			}
 		}
 		else if (this.distBallPad3(this.x, this.y) <= 0)		
@@ -198,6 +199,7 @@ export class Game4 {
 				this.padTouch2 = false;
 				this.padTouch4 = false;
 				this.wallTouch = false;
+				this.set_wall();
 			}
 		}
 		else if (this.distBallPad2(this.x, this.y) <= 0)
@@ -214,6 +216,7 @@ export class Game4 {
 				this.padTouch3 = false;
 				this.padTouch4 = false;
 				this.wallTouch = false;
+				this.set_wall();
 			}			
 		}		
 		else if (this.distBallPad1(this.x, this.y) <= 0)		
@@ -230,6 +233,7 @@ export class Game4 {
 				this.padTouch3 = false;
 				this.padTouch4 = false;
 				this.wallTouch = false;
+				this.set_wall();
 			}
 		}
 		else if (this.wally && this.wall === 1 && this.isWallTouched(this.x, this.y))
@@ -246,7 +250,7 @@ export class Game4 {
 				this.padTouch4 = false;
 			}			
 		}				
-		console.log("lastPaddle = " + this.lastPaddle);
+		// console.log("lastPaddle = " + this.lastPaddle);
 	}	
 	
 	next()
@@ -297,6 +301,7 @@ export class Game4 {
 		{
 			this.wall = getRandomIntInclusive(0, 1);
 			this.gameState.wall = this.wall;
+			console.log("wall = " + this.wall);
 		}
 	}
 
@@ -387,7 +392,7 @@ export class Game4 {
 		const yW3 = this.canvasHeight / 2 - this.paddleWidth / 2;
 		const yW4 = this.canvasHeight / 2 + this.paddleWidth / 2;
 		
-		if (xW1 <= xB1 &&  xB1 <= xW2)
+		if (xW1 <= xB1 && xB1 <= xW2)
 			return (true);
 		if (xW1 <= xB2 && xB2 <= xW2)
 			return (true);
@@ -466,8 +471,8 @@ export class Game4 {
 			if (this.s1 >= this.limit)
 			{
 				this.winner = "p1";
-				// this.gameState.winner = this.winner;
-				// clearInterval(this.intervalId);
+				this.gameState.winner = this.winner;
+				clearInterval(this.intervalId);
 			}
 		}	
 		else if (lastPaddle === "p2")
@@ -477,8 +482,8 @@ export class Game4 {
 			if (this.s2 >= this.limit)
 			{
 				this.winner = "p2";
-				// this.gameState.winner = this.winner;
-				// clearInterval(this.intervalId);
+				this.gameState.winner = this.winner;
+				clearInterval(this.intervalId);
 			}
 		}
 		else if (lastPaddle === "p3")
@@ -488,8 +493,8 @@ export class Game4 {
 			if (this.s3 >= this.limit)
 			{
 				this.winner = "p3";
-				// this.gameState.winner = this.winner;
-				// clearInterval(this.intervalId);
+				this.gameState.winner = this.winner;
+				clearInterval(this.intervalId);
 			}
 		}
 		else if (lastPaddle === "p4")
@@ -498,16 +503,16 @@ export class Game4 {
 			this.gameState.score.p4 = this.s4;
 			if (this.s4 >= this.limit)
 			{
-				this.winner = "p4";
-				// this.gameState.winner = this.winner;
-				// clearInterval(this.intervalId);
+				this.winner = "p4";				
+				this.gameState.winner = this.winner;
+				clearInterval(this.intervalId);
 			}
 		}
-		if (lastPaddle === "p1" || lastPaddle === "p2" || lastPaddle === "p3" || lastPaddle === "p4")
-		{
-			this.gameState.winner = this.winner;
-			clearInterval(this.intervalId);
-		}	
+		// if (lastPaddle === "p1" || lastPaddle === "p2" || lastPaddle === "p3" || lastPaddle === "p4")
+		// {
+		// 	this.gameState.winner = this.winner;
+		// 	clearInterval(this.intervalId);
+		// }	
 	}	
 }
 
@@ -533,6 +538,10 @@ function getRandomSign()
 		return (-1);
 }
 
+function getRandom(min, max)
+{
+   return (Math.random() * (max - min) + min);   
+}
 
 // reset padTouch crossing the middle --> when touch another pad
 // if (this.canvasWidth / 2 - this.ballRadius <= this.x && this.x <= this.canvasWidth / 2 + this.ballRadius)

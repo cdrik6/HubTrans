@@ -17,7 +17,7 @@ let rightPressed4 = false;
 let paddle = {p1: "", p2: "", p3: "", p4: ""};
 let start = {start: ""};
 let end = {end: ""};
-let mode = { nbPlayers: 4, userId: "", speedy: false, paddy: false, wally: true, mirry: false };
+let mode = { nbPlayers: 4, userId: "", speedy: true, paddy: false, wally: false, mirry: true };
 
 // const loggedUser = await getCurrentUser();
 // if (loggedUser)	
@@ -204,12 +204,12 @@ function drawlines(paddle1Y, paddle2Y, paddle3X, paddle4X)
 	ctx.beginPath();
 	ctx.rect(0, paddle1Y, canvas.width, 1);
 	ctx.rect(0, paddle2Y, canvas.width, 1);
-	ctx.rect(0, paddle1Y + paddleHeight, canvas.width, 1);	
-	ctx.rect(0, paddle2Y + paddleHeight, canvas.width, 1);
+	ctx.rect(0, paddle1Y + paddleHeight - 1, canvas.width, 1);	
+	ctx.rect(0, paddle2Y + paddleHeight - 1, canvas.width, 1);
 	ctx.rect(paddle3X, 0, 1, canvas.height);
 	ctx.rect(paddle4X, 0, 1, canvas.height);
-	ctx.rect(paddle3X + paddleHeight, 0, 1, canvas.height);
-	ctx.rect(paddle4X + paddleHeight, 0, 1, canvas.height);
+	ctx.rect(paddle3X + paddleHeight - 1, 0, 1, canvas.height);
+	ctx.rect(paddle4X + paddleHeight - 1, 0, 1, canvas.height);
 	ctx.fillStyle = "rgba(0, 0, 0, 1)";
 	ctx.fill();
 	ctx.closePath();	

@@ -130,7 +130,7 @@ export class Game {
 				this.speed();
 				this.padTouch1 = false;
 				this.wallTouch = false;				
-				this.set_wall();				
+				this.set_wall();
 				this.nbrTouch++;	
 			}			
 		}		

@@ -84,7 +84,7 @@ fast.ready().then(() => {
 		});
 		
 		clt_skt.on('message', clt_msg => {           
-            console.log('Server received:', clt_msg.toString());            
+            //console.log('Server received:', clt_msg.toString());            
 			const data = JSON.parse(clt_msg);
             try
 			{					
@@ -325,7 +325,7 @@ function PaddleInData(clt_skt, data)
 	const game = gamesByClient.get(clt_skt);					
 	if (game)
 	{
-		console.log('gameid: ' + game.id);
+		// console.log('gameid: ' + game.id);
 		if (game.mode === 2)
 		{
 			// console.log('pad1:', data.p1);
